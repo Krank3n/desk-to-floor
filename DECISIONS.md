@@ -1,0 +1,17 @@
+# DECISIONS.md
+
+One line per decision. Never re-litigate; supersede with a new dated entry.
+
+- **2026-08-21** Expo SDK 57 / RN 0.86 / React 19.2, managed workflow + `expo prebuild` in CI. Latest stable at kickoff; template pins kept.
+- **2026-08-21** Android-only v1. No iOS build, no react-native-web — smaller dependency surface, faster CI.
+- **2026-08-21** Dark-only UI in v1 (`userInterfaceStyle: "dark"`). The app is a filming rig used mid-workout; one theme, no switching logic.
+- **2026-08-21** Android package `com.hansendev.desktofloor`; app slug `desk-to-floor`.
+- **2026-08-21** Screens live in `src/screens/`, routes in `src/app/` are one-line re-exports — screens stay testable without router context.
+- **2026-08-21** Domain logic goes in `src/lib/` as pure TypeScript, UI-free, so unit tests carry most of the confidence and CI stays fast.
+- **2026-08-21** Release APKs are debug-signed (Expo prebuild default). Fine for sideloading; no signing secrets in CI. Revisit only if Play Store ever matters.
+- **2026-08-21** CI order per plan: checks → APK build → Maestro smoke → nightly release. A build that fails the smoke test is never published.
+- **2026-08-21** Rolling GitHub release tagged `nightly`, asset `desk-to-floor-nightly.apk`, `--clobber` on every green main push.
+- **2026-08-21** Emulator job: API 34 x86_64, pixel_6 profile, KVM on ubuntu-latest, no AVD snapshot caching yet (add only if boot time hurts).
+- **2026-08-21** Template's React Compiler experiment and typed-routes disabled — fewer moving parts in Jest and CI typecheck.
+- **2026-08-21** Event-log timestamps are milliseconds relative to session start (monotonic), with one absolute `startedAt` anchor — see EVENTLOG.md.
+- **2026-08-21** `versionCode` bumped manually in app.json when user-visible changes ship, so sideloaded upgrades install cleanly.

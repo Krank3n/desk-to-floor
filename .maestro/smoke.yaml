@@ -1,0 +1,17 @@
+# M0 smoke test: the app boots and all three tabs render.
+# Keep this flow minimal and fast — it is the flakiest link in CI and
+# rule #1 in CLAUDE.md is keeping it green.
+appId: com.hansendev.desktofloor
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 60000
+- assertVisible: 'Train'
+- tapOn: 'Sessions'
+- assertVisible: 'No sessions yet'
+- tapOn: 'Settings'
+- assertVisible: 'Channel'
+- tapOn: 'Train'
+- assertVisible: 'Ready to train'

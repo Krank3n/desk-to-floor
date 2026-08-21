@@ -1,65 +1,38 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Desk to Floor design tokens.
+ *
+ * v1 is deliberately dark-only: this app is used mid-workout, often pointed at
+ * a camera in a room with controlled lighting. One theme, no runtime switching.
+ * (Recorded in DECISIONS.md.)
  */
-
-import '@/global.css';
-
-import { Platform } from 'react-native';
-
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+export const theme = {
+  colors: {
+    bg: '#0B0F14',
+    surface: '#141B23',
+    surfaceRaised: '#1C2530',
+    border: '#26313E',
+    text: '#F2F5F7',
+    textMuted: '#8A97A5',
+    accent: '#FF6B2C',
+    accentPressed: '#D9531C',
+    success: '#3ECF8E',
+    danger: '#FF5A5F',
   },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+  /** 4pt spacing grid: spacing(4) = 16 */
+  spacing: (n: number) => n * 4,
+  radius: {
+    sm: 8,
+    md: 12,
+    lg: 20,
+  },
+  font: {
+    /** Big timer / hero numerals */
+    display: 44,
+    title: 28,
+    heading: 20,
+    body: 16,
+    caption: 13,
   },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
-
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
-
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export type Theme = typeof theme;

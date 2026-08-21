@@ -1,56 +1,42 @@
-# Welcome to your Expo app 👋
+# Desk to Floor
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An Android training app + video production rig for documenting the journey
+from a desk-wrecked body to breaking. The app runs the workout, films it, and
+writes a timestamped event log; a Node + ffmpeg pipeline turns raw footage into
+edited long-form and Shorts cuts — no on-device editing, no ML.
 
-## Get started
+**Get the app:** download `desk-to-floor-nightly.apk` from the
+[nightly release](../../releases/tag/nightly) on your phone and open it.
 
-1. Install dependencies
+## Layout
 
-   ```bash
-   npm install
-   ```
+| Path | What |
+| --- | --- |
+| `src/app/` | expo-router routes (thin re-exports) |
+| `src/screens/` | screen components |
+| `src/lib/` | pure TS domain logic: exercises, sessions, event log |
+| `pipeline/` | auto-editor (M4) |
+| `.maestro/` | E2E smoke flows |
 
-2. Start the app
+## The brain
 
-   ```bash
-   npx expo start
-   ```
+- `CLAUDE.md` — standing rules for the autonomous nightly build loop
+- `ROADMAP.md` — milestones M0–M6, one item per run
+- `BUILDLOG.md` — what changed, run by run
+- `DECISIONS.md` — defaults chosen, never re-litigated
+- `EVENTLOG.md` — the session log schema (the app↔pipeline contract)
 
-In the output, you'll find options to open the app in a
+## Dev
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm install
+npm run typecheck && npm run lint && npm test
+npm run android   # local dev build
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+CI builds the installable APK on every push to `main`: checks → Gradle release
+build → Maestro smoke test on an emulator → APK attached to the rolling
+`nightly` release.
 
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Feedback loop: open a GitHub issue titled `FEEDBACK: …` — it outranks the
+roadmap on the next nightly run.
