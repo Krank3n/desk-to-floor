@@ -1,27 +1,43 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/constants/theme';
+import { generateSession } from '@/lib/session';
 
 export default function TrainScreen() {
+  const router = useRouter();
+  const plan = generateSession();
+  const minutes = Math.round(plan.totalSeconds / 60);
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.container}>
         <Text style={styles.kicker}>DESK → FLOOR</Text>
         <Text style={styles.title}>Ready to train</Text>
         <Text style={styles.subtitle}>
-          Wrists first, freezes later. The workout engine arrives in M1 — this
-          build proves the shell, theme, and pipeline.
+          Wrists first, freezes later. Today is scripted, spoken, and logged —
+          press start and follow the voice.
         </Text>
 
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>NEXT UP (M1)</Text>
-          <Text style={styles.cardTitle}>Undesk · Week 1</Text>
+          <Text style={styles.cardLabel}>TODAY&apos;S SESSION</Text>
+          <Text style={styles.cardTitle}>{plan.name}</Text>
           <Text style={styles.cardBody}>
-            Wrist prep · 90/90 hips · T-spine rotation · deep squat · toprock
-            foundations
+            {plan.moves.length} moves · about {minutes} min ·{' '}
+            {plan.moves[0].exercise.name} through{' '}
+            {plan.moves[plan.moves.length - 1].exercise.name}
           </Text>
         </View>
+
+        <View style={styles.spacer} />
+        <Pressable
+          style={styles.primaryButton}
+          onPress={() => router.push('/workout')}
+          accessibilityRole="button"
+        >
+          <Text style={styles.primaryButtonText}>Start session</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -77,5 +93,19 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: theme.font.body,
     lineHeight: 22,
+  },
+  spacer: {
+    flex: 1,
+  },
+  primaryButton: {
+    backgroundColor: theme.colors.accent,
+    borderRadius: theme.radius.md,
+    paddingVertical: theme.spacing(4),
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: theme.colors.bg,
+    fontSize: theme.font.heading,
+    fontWeight: '700',
   },
 });

@@ -22,7 +22,7 @@ export default function SettingsScreen() {
         <View style={styles.group}>
           <Row label="Version" value={version} />
           <Row label="Channel" value="nightly" />
-          <Row label="Event log schema" value="v1 (lands in M1)" />
+          <Row label="Event log schema" value="v1" />
         </View>
       </View>
     </SafeAreaView>

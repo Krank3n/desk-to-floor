@@ -5,7 +5,7 @@ session, and the auto-editor pipeline (M4) consumes it to cut video without any
 ML. **Any change to this schema requires a `schemaVersion` bump, a migration
 note in this file, and pipeline support for reading the previous version.**
 
-## Current version: 1 (implementation lands in M1)
+## Current version: 1 (implemented in `src/lib/eventlog.ts`)
 
 One JSON file per session, written next to the session's video file (M2+):
 `session-<sessionId>.json`.
@@ -13,7 +13,7 @@ One JSON file per session, written next to the session's video file (M2+):
 ```jsonc
 {
   "schemaVersion": 1,
-  "sessionId": "b3f1c9d2-…",            // uuid v4
+  "sessionId": "20260821T093000-4f2a9c", // sortable timestamp + random suffix
   "startedAt": "2026-08-21T09:30:00.000+10:00", // absolute wall-clock anchor
   "appVersion": "0.1.0",
   "plan": {                              // the session as generated, for reference
@@ -52,7 +52,8 @@ One JSON file per session, written next to the session's video file (M2+):
 
 ## Version history
 
-- **v1** (2026-08-21, designed at kickoff; ships with M1): initial schema —
+- **v1** (2026-08-21, designed at kickoff; shipped with M1 the same day —
+  session ids amended pre-ship from uuid to sortable timestamp+suffix): initial schema —
   session envelope, plan, move/rest/redo/pause events, null placeholders for
   `recording` (M2) and `music` (M3). Filling a null placeholder with the shape
   documented above is *not* a version bump; changing event fields or semantics is.

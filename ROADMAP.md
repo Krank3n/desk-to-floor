@@ -5,30 +5,30 @@ its tests pass and CI is green on `main`.
 
 ## M0 — Foundation
 
-- [ ] Expo scaffold (SDK 57, TypeScript, expo-router), lean dependency set
-- [ ] Tab nav shell: Train / Sessions / Settings, dark theme tokens
-- [ ] Jest + RN Testing Library unit tests; ESLint; typecheck
-- [ ] CI: typecheck, lint, unit tests on every push
-- [ ] CI: release APK via expo prebuild + Gradle, uploaded as artifact
-- [ ] CI: Maestro smoke test on Android emulator (KVM)
-- [ ] CI: rolling `nightly` GitHub release with sideloadable APK
+- [x] Expo scaffold (SDK 57, TypeScript, expo-router), lean dependency set
+- [x] Tab nav shell: Train / Sessions / Settings, dark theme tokens
+- [x] Jest + RN Testing Library unit tests; ESLint; typecheck
+- [x] CI: typecheck, lint, unit tests on every push
+- [x] CI: release APK via expo prebuild + Gradle, uploaded as artifact
+- [x] CI: Maestro smoke test on Android emulator (KVM)
+- [x] CI: rolling `nightly` GitHub release with sideloadable APK
 
 ## M1 — Workout engine
 
-- [ ] Exercise library in `src/lib/exercises.ts`: wrist prep, 90/90 hips,
+- [x] Exercise library in `src/lib/exercises.ts`: wrist prep, 90/90 hips,
       T-spine rotation, deep squat, cossack squat, hollow body, push-up, row,
       toprock (Indian step), 6-step, crow progression, baby-freeze progression —
       each with id, name, category, default work/rest seconds, cue text
-- [ ] Session generator in `src/lib/session.ts`: builds an ordered session
+- [x] Session generator in `src/lib/session.ts`: builds an ordered session
       (warm-up wrists first → mobility → strength/skill → cooldown) from the
       library, deterministic given a seed/config
-- [ ] Event log v1 in `src/lib/eventlog.ts` per EVENTLOG.md: typed events,
+- [x] Event log v1 in `src/lib/eventlog.ts` per EVENTLOG.md: typed events,
       in-memory recorder, JSON serialisation
-- [ ] Workout player screen: work/rest timer, current move, next-move preview,
+- [x] Workout player screen: work/rest timer, current move, next-move preview,
       pause/skip, wired to the session clock and event recorder
-- [ ] TTS cues via expo-speech: move name at start, 3-2-1 countdown, rest cues
-- [ ] Session log written to app storage on finish; Sessions tab lists past sessions
-- [ ] Maestro flow: start a session, see the timer and move name, finish
+- [x] TTS cues via expo-speech: move name at start, 3-2-1 countdown, rest cues
+- [x] Session log written to app storage on finish; Sessions tab lists past sessions
+- [x] Maestro flow: start a session, see the timer and move name, finish
 
 ## M2 — Recording studio
 

@@ -15,3 +15,8 @@ One line per decision. Never re-litigate; supersede with a new dated entry.
 - **2026-08-21** Template's React Compiler experiment and typed-routes disabled — fewer moving parts in Jest and CI typecheck.
 - **2026-08-21** Event-log timestamps are milliseconds relative to session start (monotonic), with one absolute `startedAt` anchor — see EVENTLOG.md.
 - **2026-08-21** `versionCode` bumped manually in app.json when user-visible changes ship, so sideloaded upgrades install cleanly.
+- **2026-08-21** Session ids are sortable timestamp+random (`20260821T093000-4f2a9c`), not uuid — human-skimmable filenames beat RFC purity here.
+- **2026-08-21** Pausing freezes the phase timer but the session clock keeps rolling; pauses are events. Keeps the log aligned with continuously-rolling video (M2) — the pipeline cuts paused spans.
+- **2026-08-21** The End button ends immediately, no confirm dialog — fewest taps mid-floor; the log is saved either way, and a wrong tap costs nothing.
+- **2026-08-21** Session storage uses the `expo-file-system/legacy` API — stable, documented surface; migrate to the object API only if legacy is removed.
+- **2026-08-21** Player logic is a pure state machine (`src/lib/player.ts`); the screen owns only a setInterval and TTS side effects. Real elapsed time, not tick counts.

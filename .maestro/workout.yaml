@@ -1,0 +1,31 @@
+# M1 flow: start a session, see the player, end it, find it in Sessions.
+appId: com.hansendev.desktofloor
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 60000
+- tapOn: 'Start session'
+- extendedWaitUntil:
+    visible: 'Begin session'
+    timeout: 15000
+- tapOn: 'Begin session'
+- extendedWaitUntil:
+    visible: 'Wrist rocks'
+    timeout: 15000
+- assertVisible: 'WORK'
+- tapOn: 'Pause'
+- assertVisible: 'Resume'
+- tapOn: 'End'
+- extendedWaitUntil:
+    visible: 'SESSION COMPLETE'
+    timeout: 10000
+- tapOn: 'Done'
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 10000
+- tapOn: 'Sessions'
+- extendedWaitUntil:
+    visible: 'Undesk · Week 1'
+    timeout: 10000
