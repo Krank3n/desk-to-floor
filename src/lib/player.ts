@@ -109,6 +109,28 @@ export function skip(state: PlayerState): TickResult {
     : finishRest({ ...state });
 }
 
+/**
+ * Drop a redo marker on the current move (M2): the editor discards footage
+ * from the move's start to this marker and keeps the retake.
+ */
+export function markRedo(state: PlayerState): TickResult {
+  if (state.phase !== 'work') return { state, effects: [] };
+  return {
+    state: {
+      ...state,
+      events: [
+        ...state.events,
+        {
+          type: 'redo',
+          atMs: state.sessionMs,
+          moveId: currentMove(state).exercise.id,
+        },
+      ],
+    },
+    effects: [{ kind: 'speak', text: 'Redo marked.' }],
+  };
+}
+
 /** Stop the whole session now, recording session_end. */
 export function endSession(state: PlayerState): TickResult {
   if (state.phase === 'done' || state.phase === 'idle') {

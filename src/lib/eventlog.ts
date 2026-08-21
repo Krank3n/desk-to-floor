@@ -110,6 +110,7 @@ export interface SessionSummary {
   name: string;
   moveCount: number;
   durationMs: number;
+  hasVideo: boolean;
 }
 
 export function summarizeEventLog(log: EventLog): SessionSummary {
@@ -121,5 +122,6 @@ export function summarizeEventLog(log: EventLog): SessionSummary {
     name: log.plan.name,
     moveCount: log.events.filter((e) => e.type === 'move_start').length,
     durationMs: end?.atMs ?? last?.atMs ?? 0,
+    hasVideo: log.recording !== null,
   };
 }

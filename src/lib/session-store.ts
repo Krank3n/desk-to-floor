@@ -9,19 +9,48 @@ import {
 } from './eventlog';
 
 /**
- * Session logs on disk: <documentDirectory>/sessions/session-<id>.json.
+ * Session artifacts on disk, one pair per session:
+ *   <documentDirectory>/sessions/session-<id>.json   — the event log
+ *   <documentDirectory>/sessions/session-<id>.mp4    — the raw footage (M2)
  * The only module that touches the filesystem — screens mock this in tests.
- * In M2 the recording video lands in the same directory with the same id.
  */
 const sessionsDir = () => `${FileSystem.documentDirectory ?? ''}sessions/`;
 
-export async function saveEventLog(log: EventLog): Promise<string> {
+export interface SessionVideo {
+  /** Temp uri returned by the camera (cache dir). */
+  uri: string;
+  /** Session-clock ms at which recording was started. */
+  startOffsetMs: number;
+}
+
+/**
+ * Persist a finished session: move the footage (if any) next to the log and
+ * write the log with its recording info filled in. If the video move fails,
+ * the log is still saved — with recording null — so a session is never lost.
+ */
+export async function saveSession(
+  log: EventLog,
+  video: SessionVideo | null,
+): Promise<string> {
   const dir = sessionsDir();
   await FileSystem.makeDirectoryAsync(dir, { intermediates: true }).catch(
     () => undefined,
   );
+  let finalLog = log;
+  if (video) {
+    const file = `session-${log.sessionId}.mp4`;
+    try {
+      await FileSystem.moveAsync({ from: video.uri, to: dir + file });
+      finalLog = {
+        ...log,
+        recording: { file, startOffsetMs: video.startOffsetMs },
+      };
+    } catch {
+      // Footage lost or unmovable; keep the log, recording stays null.
+    }
+  }
   const path = `${dir}session-${log.sessionId}.json`;
-  await FileSystem.writeAsStringAsync(path, serializeEventLog(log));
+  await FileSystem.writeAsStringAsync(path, serializeEventLog(finalLog));
   return path;
 }
 

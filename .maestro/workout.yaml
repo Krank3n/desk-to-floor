@@ -15,6 +15,7 @@ appId: com.hansendev.desktofloor
     visible: 'Wrist rocks'
     timeout: 15000
 - assertVisible: 'WORK'
+- assertVisible: 'REC'
 - tapOn: 'Pause'
 - assertVisible: 'Resume'
 - tapOn: 'End'

@@ -3,6 +3,7 @@ import {
   begin,
   createPlayer,
   endSession,
+  markRedo,
   pause,
   phaseRemainingSeconds,
   resume,
@@ -122,6 +123,30 @@ describe('skip', () => {
       atMs: 12345,
       moveId: 'wrist-rocks',
     });
+  });
+});
+
+describe('markRedo', () => {
+  it('drops a redo marker for the current move during work', () => {
+    let state = beginPlayer();
+    state = tick(state, 20000).state;
+    const { state: marked, effects } = markRedo(state);
+    expect(marked.events).toContainEqual({
+      type: 'redo',
+      atMs: 20000,
+      moveId: 'wrist-rocks',
+    });
+    expect(marked.phase).toBe('work');
+    expect(effects[0].text).toContain('Redo');
+  });
+
+  it('is a no-op outside the work phase', () => {
+    let state = beginPlayer();
+    state = tick(state, 40000).state; // now resting
+    expect(state.phase).toBe('rest');
+    const { state: after, effects } = markRedo(state);
+    expect(after.events).toEqual(state.events);
+    expect(effects).toHaveLength(0);
   });
 });
 

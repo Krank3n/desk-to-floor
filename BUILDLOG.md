@@ -3,6 +3,27 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-21 — M2: recording studio (same-day, session 3)
+
+- Front-camera recording (expo-camera) runs while the workout runs: preview
+  behind the player UI with a dark scrim, REC badge, all overlay text UI-only —
+  nothing burned into the raw file.
+- "Record video" toggle on the pre-session screen (default on) with permission
+  handling; sessions run fine without recording if denied.
+- Redo button during work intervals → `redo` markers in the event log
+  (`markRedo` in the player state machine).
+- Footage saved next to the log as `session-<id>.mp4` via `saveSession`;
+  `recording.startOffsetMs` filled (precision caveat documented in EVENTLOG.md
+  — editors pad cuts with handles). Log still saved if the video move fails.
+- Screen stays awake during sessions (expo-keep-awake).
+- CI grants CAMERA/RECORD_AUDIO via adb before Maestro; workout flow asserts
+  the REC badge. 38 tests / 7 suites. versionCode 3, v0.3.0.
+- Also this session: repo made public (owner's call) to unblock Actions
+  billing; issue #1 closed.
+- **Check in the APK:** camera preview appears behind the timer, REC shows
+  while filming, and a finished session's row in Sessions says "· video";
+  the .mp4 plays and roughly matches the log timestamps.
+
 ## 2026-08-21 — M1: workout engine (same-day follow-up)
 
 - `src/lib/`: exercise library (14 moves incl. wrist prep, 90/90, toprock,

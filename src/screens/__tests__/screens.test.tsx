@@ -16,7 +16,7 @@ jest.mock('expo-router', () => {
 
 jest.mock('@/lib/session-store', () => ({
   listSessionSummaries: jest.fn().mockResolvedValue([]),
-  saveEventLog: jest.fn().mockResolvedValue('mock://saved'),
+  saveSession: jest.fn().mockResolvedValue('mock://saved'),
 }));
 
 describe('TrainScreen', () => {
@@ -43,6 +43,7 @@ describe('SessionsScreen', () => {
         name: 'Undesk · Week 1',
         moveCount: 10,
         durationMs: 600000,
+        hasVideo: true,
       },
     ]);
     await render(<SessionsScreen />);
@@ -50,6 +51,7 @@ describe('SessionsScreen', () => {
       expect(screen.getByText('Undesk · Week 1')).toBeOnTheScreen(),
     );
     expect(screen.getByText(/10 moves/)).toBeOnTheScreen();
+    expect(screen.getByText(/· video/)).toBeOnTheScreen();
   });
 });
 

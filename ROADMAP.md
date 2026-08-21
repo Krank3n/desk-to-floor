@@ -32,12 +32,12 @@ its tests pass and CI is green on `main`.
 
 ## M2 — Recording studio
 
-- [ ] expo-camera front-camera recording while the workout runs
-- [ ] Recording-start offset captured in the event log
-- [ ] Overlay UI: big move name + countdown (UI-only, never burned into raw footage)
-- [ ] One-tap redo marker → event log
-- [ ] Footage + event log saved together per session
-- [ ] Maestro flow updated (camera permission granted via adb in CI)
+- [x] expo-camera front-camera recording while the workout runs
+- [x] Recording-start offset captured in the event log
+- [x] Overlay UI: big move name + countdown (UI-only, never burned into raw footage)
+- [x] One-tap redo marker → event log
+- [x] Footage + event log saved together per session
+- [x] Maestro flow updated (camera permission granted via adb in CI)
 
 ## M3 — Music + music mode
 

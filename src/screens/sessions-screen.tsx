@@ -64,6 +64,7 @@ export default function SessionsScreen() {
                 <Text style={styles.rowMeta}>
                   {formatWhen(item.startedAt)} · {item.moveCount} moves ·{' '}
                   {formatDuration(item.durationMs)}
+                  {item.hasVideo ? ' · video' : ''}
                 </Text>
               </View>
             )}

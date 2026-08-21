@@ -44,6 +44,12 @@ One JSON file per session, written next to the session's video file (M2+):
 - `recording.startOffsetMs` is the session-clock time at which the video file's
   frame 0 was captured. Video time `t` = session time `t + startOffsetMs`… i.e.
   `videoMs = atMs - startOffsetMs` for any event.
+  *Precision caveat (M2):* the app records the session-clock time at which it
+  *asked* the camera to start; true frame 0 lags by camera-start latency
+  (~100–300 ms). The auto-editor must pad cuts with handles (≥0.5 s) rather
+  than cutting frame-exact on event boundaries.
+- Footage is stored next to the log as `session-<sessionId>.mp4`; the redo
+  button in the player writes `redo` markers during work intervals.
 - A `redo` marker means: discard footage of the current move from its
   `move_start` up to the marker; the retake continues until `move_end`.
 - Events are append-only and strictly ordered by `atMs`.

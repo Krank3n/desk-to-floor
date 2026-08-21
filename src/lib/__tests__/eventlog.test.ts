@@ -80,5 +80,6 @@ describe('summarizeEventLog', () => {
     expect(summary.name).toBe('Undesk · Week 1');
     expect(summary.moveCount).toBe(1);
     expect(summary.durationMs).toBe(40000);
+    expect(summary.hasVideo).toBe(false);
   });
 });
