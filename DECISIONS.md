@@ -20,3 +20,5 @@ One line per decision. Never re-litigate; supersede with a new dated entry.
 - **2026-08-21** The End button ends immediately, no confirm dialog — fewest taps mid-floor; the log is saved either way, and a wrong tap costs nothing.
 - **2026-08-21** Session storage uses the `expo-file-system/legacy` API — stable, documented surface; migrate to the object API only if legacy is removed.
 - **2026-08-21** Player logic is a pure state machine (`src/lib/player.ts`); the screen owns only a setInterval and TTS side effects. Real elapsed time, not tick counts.
+- **2026-08-21** Nightly cloud routine `trig_019k2i2bLjLAb2vp2GB19Bjs`: cron `0 16 * * *` UTC (2am AEST, drifts to 3am during AEDT — accepted), model claude-sonnet-5, no MCP connectors. Manage at https://claude.ai/code/routines.
+- **2026-08-21** Nightly routine has a standing billing guard: if Actions jobs fail to start with the account-billing error, it comments once on the FEEDBACK billing issue and stops instead of retrying.
