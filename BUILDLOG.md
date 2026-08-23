@@ -3,6 +3,23 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-23 — Device testing on the iOS simulator; done-screen copy fix
+
+- Ran the current build on the DTF-Dev simulator (Expo Go, Metro :8083) and
+  drove a full session: plan screen, timer, cues, controls, session saved,
+  Music screen, tap-tempo (95.4 BPM off five taps, persisted).
+- Pulled the app-written event log off the simulator and ran it through the
+  auto-editor end to end: 2 segments, rest correctly dropped, 43.45 s output.
+  The simulator has no camera, so the log was paired with a stand-in clip —
+  the *cutting* is verified against real app output, the camera path is not.
+- **Fixed:** the done screen said "Footage and event log saved" even when
+  nothing was filmed (recording off, or no camera). It now says so plainly.
+  The saved data was always correct — `recording: null` — only the copy lied.
+- Confirmed the app degrades correctly with no camera: session runs, log saves.
+- versionCode 5, v0.4.1. 90 tests / 12 suites.
+- **Check in the APK:** nothing new to look at unless you turn recording off —
+  the finish screen should no longer promise footage it does not have.
+
 ## 2026-08-23 — M4: the auto-editor (session 5)
 
 - `pipeline/` turns footage + event log into edited video with ffmpeg. No ML:

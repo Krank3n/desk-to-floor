@@ -58,7 +58,10 @@ export default function WorkoutScreen() {
   });
   const sessionMeta = useRef({ id: '', startedAt: '' });
   const saved = useRef(false);
-  const [savedPath, setSavedPath] = useState<string | null>(null);
+  const [saveResult, setSaveResult] = useState<{
+    path: string;
+    hasVideo: boolean;
+  } | null>(null);
 
   // — Music (M3). The grid is anchored when playback starts; pause/resume
   // shifts it, and the log records the anchor as of session start. —
@@ -136,16 +139,17 @@ export default function WorkoutScreen() {
         events: state.events,
         music: musicInfo.current,
       });
-      return saveSession(
+      const path = await saveSession(
         log,
         videoUri
           ? { uri: videoUri, startOffsetMs: recordStartOffsetMs.current }
           : null,
       );
+      return { path, hasVideo: videoUri !== null };
     };
     finish()
-      .then(setSavedPath)
-      .catch(() => setSavedPath(null));
+      .then(setSaveResult)
+      .catch(() => setSaveResult(null));
   }, [state]);
 
   useEffect(
@@ -300,9 +304,12 @@ export default function WorkoutScreen() {
               {formatSeconds(Math.round(state.sessionMs / 1000))}
             </Text>
             <Text style={styles.subtitle}>
-              {savedPath
-                ? 'Footage and event log saved for the auto-editor.'
-                : 'Saving session…'}
+              {saveResult === null
+                ? 'Saving session…'
+                : saveResult.hasVideo
+                  ? 'Footage and event log saved for the auto-editor.'
+                  : 'Event log saved — no footage this session, so there is ' +
+                    'nothing for the auto-editor to cut.'}
             </Text>
             <View style={styles.spacer} />
             <Pressable

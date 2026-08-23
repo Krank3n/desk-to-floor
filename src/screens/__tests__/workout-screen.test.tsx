@@ -1,4 +1,10 @@
-import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+  waitFor,
+} from '@testing-library/react-native';
 import * as Speech from 'expo-speech';
 
 import { loadMusicSettings } from '@/lib/music-settings';
@@ -135,6 +141,19 @@ describe('WorkoutScreen', () => {
     expect(log.events[log.events.length - 1].type).toBe('session_end');
     expect(log.music).toBeNull();
     expect(video).toEqual({ uri: 'file:///cache/video.mp4', startOffsetMs: 0 });
+  });
+
+  it('does not claim footage was saved when nothing was filmed', async () => {
+    const user = userEvent.setup();
+    await render(<WorkoutScreen />);
+    fireEvent(screen.getByLabelText('Record video'), 'valueChange', false);
+    await user.press(screen.getByRole('button', { name: 'Begin session' }));
+    expect(screen.queryByText('REC')).not.toBeOnTheScreen();
+    await user.press(screen.getByRole('button', { name: 'End' }));
+    await waitFor(() => expect(saveSession).toHaveBeenCalledTimes(1));
+    const [, video] = (saveSession as jest.Mock).mock.calls[0];
+    expect(video).toBeNull();
+    expect(await screen.findByText(/no footage this session/)).toBeOnTheScreen();
   });
 
   describe('with music mode on', () => {

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Desk to Floor",
     "slug": "desk-to-floor",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "desktofloor",
@@ -10,7 +10,7 @@
     "backgroundColor": "#0B0F14",
     "android": {
       "package": "com.hansendev.desktofloor",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#0B0F14",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
