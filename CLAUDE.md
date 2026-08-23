@@ -52,3 +52,10 @@ is to sideload the nightly APK and train. Yours is everything else.
 - The app must keep working fully offline. No external services in v1.
 - Bump `android.versionCode` in app.json whenever the user-visible app changes,
   so sideloaded upgrades install cleanly.
+- `expo prebuild` rewrites `tsconfig.json` as a side effect (it reformats and
+  drops the `.expo/types` / `expo-env.d.ts` includes). If you run prebuild
+  locally, check `git diff tsconfig.json` and revert that noise before
+  committing.
+- Mutating an object returned from a hook (e.g. `player.loop = true` from
+  `useAudioPlayer`) fails `react-hooks/immutability` lint. Pass the setting
+  through hook options or design around it.

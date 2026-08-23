@@ -26,3 +26,9 @@ One line per decision. Never re-litigate; supersede with a new dated entry.
 - **2026-08-21** Recording defaults: front camera, audio ON (talking to camera is content; music mode replaces audio in post), "Record video" toggle defaults on, camera preview doubles as the framing aid on the pre-session screen.
 - **2026-08-21** `recording.startOffsetMs` is when the app *asked* the camera to record, not true frame 0 — camera-start latency (~100–300 ms) is absorbed by edit handles, not measured. Revisit only if beat-sync (M3/M4) proves it matters.
 - **2026-08-21** Screen keep-awake during workout sessions (expo-keep-awake) — a sleeping screen would kill the recording mid-session.
+- **2026-08-21** Music tracks are user-picked local files copied into app storage (expo-document-picker + expo-audio). No bundled audio: rule 5 forbids committing media, and no external services in v1.
+- **2026-08-21** Music mode only ever *stretches* an interval to the next 8-count, never shortens one — losing prescribed work time to the beat is the wrong trade at 39.
+- **2026-08-21** Player phase ends are computed in session-time arithmetic (`phaseEndSessionMs`), not by accumulating ticks — required for exact phrase snapping, and pause-proof.
+- **2026-08-21** Pause re-anchors the beat grid by the paused duration (music pauses with the workout); the editor reconstructs the shift from pause/resume events rather than the log carrying a second anchor.
+- **2026-08-21** Music playback does not loop — a loop restart would desync phrase alignment from the extrapolated grid. Track ends, music stops, session continues.
+- **2026-08-21** Filling the event log's `music` placeholder is NOT a schema bump (EVENTLOG.md pre-authorised it at kickoff and no consumer has shipped) — reasoning recorded in EVENTLOG.md's version history rather than inflating to v2.

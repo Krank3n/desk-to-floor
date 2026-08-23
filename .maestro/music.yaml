@@ -1,0 +1,31 @@
+# M3 flow: reach the music screen and prove tap-tempo is wired.
+# Deliberately does NOT tap "Choose track" — that opens the system document
+# picker, which would hang the emulator run.
+appId: com.hansendev.desktofloor
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 60000
+- tapOn: 'Settings'
+- extendedWaitUntil:
+    visible: 'Music & beat grid'
+    timeout: 10000
+- tapOn: 'Music & beat grid'
+- extendedWaitUntil:
+    visible: 'No track selected'
+    timeout: 10000
+- assertVisible: '— BPM'
+- assertVisible: 'Taps: 0'
+- repeat:
+    times: 4
+    commands:
+      - tapOn: 'Tap tempo'
+- assertVisible: 'Taps: 4'
+- tapOn: 'Reset'
+- assertVisible: 'Taps: 0'
+- tapOn: 'Back'
+- extendedWaitUntil:
+    visible: 'Settings'
+    timeout: 10000

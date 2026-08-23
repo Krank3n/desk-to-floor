@@ -19,6 +19,23 @@ jest.mock('@/lib/session-store', () => ({
   saveSession: jest.fn().mockResolvedValue('mock://saved'),
 }));
 
+jest.mock('@/lib/music-settings', () => ({
+  ...jest.requireActual('@/lib/music-settings'),
+  loadMusicSettings: jest.fn().mockResolvedValue({
+    trackUri: null,
+    trackName: null,
+    bpm: null,
+    musicMode: false,
+    phraseBeats: 8,
+  }),
+}));
+
+jest.mock('expo-file-system/legacy', () => ({
+  documentDirectory: 'file:///doc/',
+  readAsStringAsync: jest.fn().mockRejectedValue(new Error('ENOENT')),
+  writeAsStringAsync: jest.fn().mockResolvedValue(undefined),
+}));
+
 describe('TrainScreen', () => {
   it('shows the brand and today’s generated session', async () => {
     await render(<TrainScreen />);

@@ -1,3 +1,4 @@
+import { useAudioPlayer } from 'expo-audio';
 import {
   CameraView,
   useCameraPermissions,
@@ -12,7 +13,15 @@ import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/constants/theme';
-import { buildEventLog, newSessionId } from '@/lib/eventlog';
+import { buildEventLog, MusicInfo, newSessionId } from '@/lib/eventlog';
+import { BeatGrid } from '@/lib/music';
+import {
+  DEFAULT_MUSIC_SETTINGS,
+  gridFor,
+  loadMusicSettings,
+  musicModeReady,
+  MusicSettings,
+} from '@/lib/music-settings';
 import {
   begin,
   createPlayer,
@@ -50,6 +59,16 @@ export default function WorkoutScreen() {
   const sessionMeta = useRef({ id: '', startedAt: '' });
   const saved = useRef(false);
   const [savedPath, setSavedPath] = useState<string | null>(null);
+
+  // — Music (M3). The grid is anchored when playback starts; pause/resume
+  // shifts it, and the log records the anchor as of session start. —
+  const [music, setMusic] = useState<MusicSettings>(DEFAULT_MUSIC_SETTINGS);
+  useEffect(() => {
+    loadMusicSettings().then(setMusic);
+  }, []);
+  const audio = useAudioPlayer(music.trackUri);
+  const musicInfo = useRef<MusicInfo | null>(null);
+  const musicOn = musicModeReady(music);
 
   // — Recording rig (M2). The overlay below is plain UI on top of the
   // preview; nothing is ever burned into the raw file. —
@@ -115,6 +134,7 @@ export default function WorkoutScreen() {
           moveIds: state.plan.moves.map((m) => m.exercise.id),
         },
         events: state.events,
+        music: musicInfo.current,
       });
       return saveSession(
         log,
@@ -155,7 +175,44 @@ export default function WorkoutScreen() {
         videoResult.current = null;
       }
     }
-    applyResult(begin(stateRef.current));
+    let grid: BeatGrid | null = null;
+    if (musicOn) {
+      grid = gridFor(music, 0);
+      musicInfo.current =
+        grid && music.trackName
+          ? {
+              track: music.trackName,
+              bpm: grid.bpm,
+              beatGridStartMs: grid.beatGridStartMs,
+              phraseBeats: grid.phraseBeats,
+            }
+          : null;
+      try {
+        // Deliberately not looping: a restart would break phrase alignment,
+        // and the grid is extrapolated arithmetically from this one anchor.
+        audio.seekTo(0);
+        audio.play();
+      } catch {
+        // Playback failed; the session still runs, just without music.
+      }
+    }
+    applyResult(begin(stateRef.current, grid));
+  };
+
+  const handlePauseResume = () => {
+    const current = stateRef.current;
+    if (current.paused) {
+      if (musicOn) audio.play();
+      applyResult(resume(current));
+    } else {
+      if (musicOn) audio.pause();
+      applyResult(pause(current));
+    }
+  };
+
+  const handleEnd = () => {
+    if (musicOn) audio.pause();
+    applyResult(endSession(stateRef.current));
   };
 
   const move = state.plan.moves[state.moveIndex];
@@ -187,6 +244,12 @@ export default function WorkoutScreen() {
                 {m.exercise.name} — {m.workSeconds}s
               </Text>
             ))}
+            {musicOn ? (
+              <Text style={styles.musicNote}>
+                Music mode: {music.trackName} at {music.bpm} BPM — moves change
+                on the 8.
+              </Text>
+            ) : null}
             <View style={styles.recordRow}>
               <Text style={styles.recordLabel}>Record video</Text>
               <Switch
@@ -265,12 +328,19 @@ export default function WorkoutScreen() {
             <Text style={[styles.phaseLabel, !isWork && styles.phaseLabelRest]}>
               {isWork ? 'WORK' : 'REST'}
             </Text>
-            {isRecording ? (
-              <View style={styles.recBadge}>
-                <View style={styles.recDot} />
-                <Text style={styles.recText}>REC</Text>
-              </View>
-            ) : null}
+            <View style={styles.badges}>
+              {musicOn ? (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{music.bpm} BPM</Text>
+                </View>
+              ) : null}
+              {isRecording ? (
+                <View style={styles.badge}>
+                  <View style={styles.recDot} />
+                  <Text style={styles.badgeText}>REC</Text>
+                </View>
+              ) : null}
+            </View>
           </View>
           <Text style={styles.timer}>
             {formatSeconds(phaseRemainingSeconds(state))}
@@ -284,13 +354,7 @@ export default function WorkoutScreen() {
           <View style={styles.controls}>
             <Pressable
               style={styles.secondaryButton}
-              onPress={() =>
-                applyResult(
-                  state.paused
-                    ? resume(stateRef.current)
-                    : pause(stateRef.current),
-                )
-              }
+              onPress={handlePauseResume}
               accessibilityRole="button"
             >
               <Text style={styles.secondaryButtonText}>
@@ -313,7 +377,7 @@ export default function WorkoutScreen() {
             </Pressable>
             <Pressable
               style={styles.secondaryButton}
-              onPress={() => applyResult(endSession(stateRef.current))}
+              onPress={handleEnd}
               accessibilityRole="button"
             >
               <Text style={styles.secondaryButtonText}>End</Text>
@@ -362,6 +426,12 @@ const styles = StyleSheet.create({
     fontSize: theme.font.body,
     lineHeight: 24,
   },
+  musicNote: {
+    color: theme.colors.accent,
+    fontSize: theme.font.caption,
+    lineHeight: 18,
+    marginTop: theme.spacing(2),
+  },
   recordRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -383,6 +453,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  badges: {
+    flexDirection: 'row',
+    gap: theme.spacing(2),
+  },
   phaseLabel: {
     color: theme.colors.accent,
     fontSize: theme.font.heading,
@@ -392,7 +466,7 @@ const styles = StyleSheet.create({
   phaseLabelRest: {
     color: theme.colors.success,
   },
-  recBadge: {
+  badge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing(1.5),
@@ -407,7 +481,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: theme.colors.danger,
   },
-  recText: {
+  badgeText: {
     color: theme.colors.text,
     fontSize: theme.font.caption,
     fontWeight: '700',

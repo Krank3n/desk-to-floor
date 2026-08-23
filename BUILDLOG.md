@@ -3,6 +3,27 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-21 — M3: music + music mode (same-day, session 4)
+
+- New **Music** screen (Settings → Music & beat grid): pick a local track with
+  the system file picker, set tempo by tapping along (4+ taps, outlier-tolerant
+  median), toggle music mode. Settings persist in `music.json`; the picked
+  track is copied into app storage so it survives cache eviction.
+- **Music mode**: work/rest intervals stretch to the next 8-count boundary —
+  never cut short — so move changes land on the "1". The player's phase ends
+  moved from tick-counting to session-time arithmetic to make this exact.
+- Pausing pauses the track and re-anchors the grid by the paused duration;
+  EVENTLOG.md documents how the editor reconstructs that shift from the
+  pause/resume events.
+- The beat grid is written to the event log (`music` object). **No schema
+  bump** — EVENTLOG.md pre-authorised filling that placeholder, and no event
+  field or semantic changed; the reasoning is recorded in its version history.
+- Playback deliberately does not loop: a restart would break phrase alignment.
+- 65 tests / 10 suites, new `.maestro/music.yaml` flow. versionCode 4, v0.4.0.
+- **Check in the APK:** Settings → Music & beat grid → tap out a tempo against
+  a track you picked, switch music mode on, then run a session and see whether
+  the move changes actually feel like they land on the 8.
+
 ## 2026-08-21 — M2: recording studio (same-day, session 3)
 
 - Front-camera recording (expo-camera) runs while the workout runs: preview

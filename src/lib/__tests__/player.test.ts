@@ -5,6 +5,7 @@ import {
   endSession,
   markRedo,
   pause,
+  phaseEndSessionMs,
   phaseRemainingSeconds,
   resume,
   skip,
@@ -123,6 +124,50 @@ describe('skip', () => {
       atMs: 12345,
       moveId: 'wrist-rocks',
     });
+  });
+});
+
+describe('music mode', () => {
+  // 120 BPM = 500ms beats, 4000ms phrases, anchored 1000ms into the session:
+  // boundaries fall at 1000, 5000, 9000, … 41000.
+  const grid = { bpm: 120, beatGridStartMs: 1000, phraseBeats: 8 };
+
+  it('stretches a work interval to the next phrase boundary', () => {
+    let state = begin(createPlayer(plan), grid).state;
+    // Nominal end is 40000; the next 8-count lands at 41000.
+    state = tick(state, 40000).state;
+    expect(state.phase).toBe('work');
+    expect(phaseRemainingSeconds(state)).toBe(1);
+    state = tick(state, 1000).state;
+    expect(state.phase).toBe('rest');
+    expect(state.events).toContainEqual({
+      type: 'move_end',
+      atMs: 41000,
+      moveId: 'wrist-rocks',
+    });
+  });
+
+  it('never cuts an interval short', () => {
+    const state = begin(createPlayer(plan), grid).state;
+    expect(phaseEndSessionMs(state)).toBeGreaterThanOrEqual(40000);
+  });
+
+  it('re-anchors the grid across a pause so cuts stay on the beat', () => {
+    let state = begin(createPlayer(plan), grid).state;
+    state = tick(state, 10000).state;
+    state = pause(state).state;
+    state = tick(state, 3000).state; // paused for 3s
+    state = resume(state).state;
+    expect(state.grid?.beatGridStartMs).toBe(4000);
+    // Boundaries now fall at 4000, 8000, … 44000; the 40s of work finishes
+    // nominally at 43000 and stretches to 44000.
+    expect(phaseEndSessionMs(state)).toBe(44000);
+  });
+
+  it('free-running timing is unchanged when there is no grid', () => {
+    const state = begin(createPlayer(plan)).state;
+    expect(state.grid).toBeNull();
+    expect(phaseEndSessionMs(state)).toBe(40000);
   });
 });
 

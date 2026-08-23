@@ -41,10 +41,11 @@ its tests pass and CI is green on `main`.
 
 ## M3 — Music + music mode
 
-- [ ] Local track playback during workouts
-- [ ] BPM entry with tap-tempo
-- [ ] Music mode: move changes snapped to 8-count phrases at track BPM
-- [ ] Beat grid written to the event log (schema bump per EVENTLOG.md)
+- [x] Local track playback during workouts
+- [x] BPM entry with tap-tempo
+- [x] Music mode: move changes snapped to 8-count phrases at track BPM
+- [x] Beat grid written to the event log (no bump needed: EVENTLOG.md
+      pre-authorised filling the `music` placeholder — see its version history)
 
 ## M4 — Auto-editor (`pipeline/`, Node + TypeScript + system ffmpeg)
 

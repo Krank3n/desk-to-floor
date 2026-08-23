@@ -56,6 +56,29 @@ One JSON file per session, written next to the session's video file (M2+):
 - Unknown event types must be ignored by consumers (forward compatibility);
   unknown `schemaVersion` must be a hard error.
 
+#### The beat grid (`music`, M3)
+
+`music` is non-null only when the session ran in music mode. There are no
+per-beat events: the grid is arithmetic, and every beat is derivable from the
+three fields.
+
+- Beat `n` falls at `beatGridStartMs + n * (60000 / bpm)`; a phrase is
+  `phraseBeats` beats (8 for breaking). Move changes were snapped to phrase
+  boundaries at record time, so `move_start` times already land on the "1" —
+  the editor should still quantize its own cuts rather than trusting them
+  frame-exactly.
+- `beatGridStartMs` is the anchor **as of session start**. Pausing pauses the
+  music, so on every `resume` the audible grid slides forward by exactly
+  `resume.atMs - pause.atMs`. Consumers must apply that shift cumulatively:
+  after the *k*th resume, the effective anchor is
+  `beatGridStartMs + Σ(resume.atMs − pause.atMs)`. Both events are in the log,
+  so the shift is fully reconstructible.
+- Playback does not loop (DECISIONS.md): if the track ends mid-session the
+  music stops, but the grid stays valid — it is extrapolated, not measured.
+- Tempo comes from tap-tempo, so treat `bpm` as accurate to ~±1 BPM. Over a
+  long session that drifts; quantize cuts to the *nearest* beat rather than
+  accumulating beat counts from the anchor.
+
 ## Version history
 
 - **v1** (2026-08-21, designed at kickoff; shipped with M1 the same day —
@@ -63,3 +86,10 @@ One JSON file per session, written next to the session's video file (M2+):
   session envelope, plan, move/rest/redo/pause events, null placeholders for
   `recording` (M2) and `music` (M3). Filling a null placeholder with the shape
   documented above is *not* a version bump; changing event fields or semantics is.
+  - *Amended 2026-08-21 (M2):* `recording` placeholder filled — shape unchanged
+    from the kickoff spec, plus the camera-latency caveat above.
+  - *Amended 2026-08-21 (M3):* `music` placeholder filled — shape unchanged from
+    the kickoff spec, plus the beat-grid semantics above. **Still v1:** no event
+    type, field, or existing semantic changed, and no consumer has shipped
+    (the pipeline lands in M4). Music-mode timing shows up only as different
+    `atMs` values, which v1 already allows.

@@ -1,4 +1,5 @@
 import { SessionEvent } from './eventlog';
+import { BeatGrid, snapToPhrase } from './music';
 import { SessionPlan } from './session';
 
 /**
@@ -8,7 +9,10 @@ import { SessionPlan } from './session';
  *
  * Clock semantics (EVENTLOG.md): sessionMs always advances — pausing freezes
  * the *phase* timer, not the session clock, so event times stay aligned with
- * continuously-rolling video in M2.
+ * continuously-rolling video.
+ *
+ * Phase ends are computed in session time (not by counting ticks) so music
+ * mode can stretch an interval to the next 8-count phrase boundary.
  */
 export type PlayerPhase = 'idle' | 'work' | 'rest' | 'done';
 
@@ -25,8 +29,16 @@ export interface PlayerState {
   moveIndex: number;
   /** Ms elapsed since begin(), monotonic, never stops until done. */
   sessionMs: number;
-  /** Ms elapsed inside the current work/rest phase (frozen while paused). */
+  /** Ms of *unpaused* time elapsed inside the current work/rest phase. */
   phaseMs: number;
+  /** Session time at which the current phase began. */
+  phaseStartSessionMs: number;
+  /** Completed paused time within the current phase. */
+  phasePausedMs: number;
+  /** Session time the in-progress pause began, or null. */
+  pausedAtSessionMs: number | null;
+  /** Music-mode beat grid; null means free-running timing. */
+  grid: BeatGrid | null;
   events: SessionEvent[];
 }
 
@@ -35,7 +47,10 @@ export interface TickResult {
   effects: SpeakEffect[];
 }
 
-export function createPlayer(plan: SessionPlan): PlayerState {
+export function createPlayer(
+  plan: SessionPlan,
+  grid: BeatGrid | null = null,
+): PlayerState {
   return {
     plan,
     phase: 'idle',
@@ -43,6 +58,10 @@ export function createPlayer(plan: SessionPlan): PlayerState {
     moveIndex: 0,
     sessionMs: 0,
     phaseMs: 0,
+    phaseStartSessionMs: 0,
+    phasePausedMs: 0,
+    pausedAtSessionMs: null,
+    grid,
     events: [],
   };
 }
@@ -51,25 +70,80 @@ function currentMove(state: PlayerState) {
   return state.plan.moves[state.moveIndex];
 }
 
-/** Whole seconds remaining in the current phase (ceil, min 0). */
-export function phaseRemainingSeconds(state: PlayerState): number {
-  const move = currentMove(state);
-  if (!move || (state.phase !== 'work' && state.phase !== 'rest')) return 0;
-  const totalMs =
-    (state.phase === 'work' ? move.workSeconds : move.restSeconds) * 1000;
-  return Math.max(0, Math.ceil((totalMs - state.phaseMs) / 1000));
+/** Paused time to discount from the current phase, including any live pause. */
+function pauseCreditMs(state: PlayerState): number {
+  const inProgress =
+    state.paused && state.pausedAtSessionMs !== null
+      ? state.sessionMs - state.pausedAtSessionMs
+      : 0;
+  return state.phasePausedMs + inProgress;
 }
 
-export function begin(state: PlayerState): TickResult {
+/**
+ * Session time at which the current phase ends. In music mode the nominal end
+ * is pushed out to the next phrase boundary, so intervals only ever stretch
+ * to finish the 8-count — never cut it short.
+ */
+export function phaseEndSessionMs(state: PlayerState): number {
+  const move = currentMove(state);
+  if (!move || (state.phase !== 'work' && state.phase !== 'rest')) {
+    return state.sessionMs;
+  }
+  const totalMs =
+    (state.phase === 'work' ? move.workSeconds : move.restSeconds) * 1000;
+  const nominal = state.phaseStartSessionMs + totalMs + pauseCreditMs(state);
+  return state.grid ? snapToPhrase(state.grid, nominal) : nominal;
+}
+
+/** Whole seconds remaining in the current phase (ceil, min 0). */
+export function phaseRemainingSeconds(state: PlayerState): number {
+  if (state.phase !== 'work' && state.phase !== 'rest') return 0;
+  return Math.max(
+    0,
+    Math.ceil((phaseEndSessionMs(state) - state.sessionMs) / 1000),
+  );
+}
+
+/** Reset the per-phase clocks; called whenever a new work/rest phase opens. */
+function openPhase(state: PlayerState): PlayerState {
+  return {
+    ...state,
+    phaseMs: 0,
+    phaseStartSessionMs: state.sessionMs,
+    phasePausedMs: 0,
+    pausedAtSessionMs: null,
+  };
+}
+
+/**
+ * Start the session. `grid` anchors music mode: pass the beat grid captured
+ * when playback started, or null for free-running timing.
+ */
+export function begin(
+  state: PlayerState,
+  grid: BeatGrid | null = state.grid,
+): TickResult {
   if (state.phase !== 'idle') return { state, effects: [] };
   const move = currentMove(state);
   const events: SessionEvent[] = [
     { type: 'session_start', atMs: 0 },
-    { type: 'move_start', atMs: 0, moveId: move.exercise.id, name: move.exercise.name },
+    {
+      type: 'move_start',
+      atMs: 0,
+      moveId: move.exercise.id,
+      name: move.exercise.name,
+    },
   ];
   return {
-    state: { ...state, phase: 'work', phaseMs: 0, events: [...state.events, ...events] },
-    effects: [{ kind: 'speak', text: `${move.exercise.cue} ${move.workSeconds} seconds.` }],
+    state: openPhase({
+      ...state,
+      phase: 'work',
+      grid,
+      events: [...state.events, ...events],
+    }),
+    effects: [
+      { kind: 'speak', text: `${move.exercise.cue} ${move.workSeconds} seconds.` },
+    ],
   };
 }
 
@@ -81,18 +155,36 @@ export function pause(state: PlayerState): TickResult {
     state: {
       ...state,
       paused: true,
+      pausedAtSessionMs: state.sessionMs,
       events: [...state.events, { type: 'pause', atMs: state.sessionMs }],
     },
     effects: [{ kind: 'speak', text: 'Paused.' }],
   };
 }
 
+/**
+ * Resume. The music was paused too, so the audible beat grid slides forward
+ * by exactly the paused duration — re-anchor it (EVENTLOG.md documents this
+ * so the auto-editor can reconstruct the same shift from pause/resume events).
+ */
 export function resume(state: PlayerState): TickResult {
   if (!state.paused) return { state, effects: [] };
+  const pausedFor =
+    state.pausedAtSessionMs !== null
+      ? state.sessionMs - state.pausedAtSessionMs
+      : 0;
   return {
     state: {
       ...state,
       paused: false,
+      pausedAtSessionMs: null,
+      phasePausedMs: state.phasePausedMs + pausedFor,
+      grid: state.grid
+        ? {
+            ...state.grid,
+            beatGridStartMs: state.grid.beatGridStartMs + pausedFor,
+          }
+        : null,
       events: [...state.events, { type: 'resume', atMs: state.sessionMs }],
     },
     effects: [{ kind: 'speak', text: 'Go.' }],
@@ -104,14 +196,12 @@ export function skip(state: PlayerState): TickResult {
   if (state.phase !== 'work' && state.phase !== 'rest') {
     return { state, effects: [] };
   }
-  return state.phase === 'work'
-    ? finishWork(state)
-    : finishRest({ ...state });
+  return state.phase === 'work' ? finishWork(state) : finishRest(state);
 }
 
 /**
- * Drop a redo marker on the current move (M2): the editor discards footage
- * from the move's start to this marker and keeps the retake.
+ * Drop a redo marker on the current move: the editor discards footage from
+ * the move's start to this marker and keeps the retake.
  */
 export function markRedo(state: PlayerState): TickResult {
   if (state.phase !== 'work') return { state, effects: [] };
@@ -134,10 +224,7 @@ export function markRedo(state: PlayerState): TickResult {
 /** Stop the whole session now, recording session_end. */
 export function endSession(state: PlayerState): TickResult {
   if (state.phase === 'done' || state.phase === 'idle') {
-    return {
-      state: { ...state, phase: 'done' },
-      effects: [],
-    };
+    return { state: { ...state, phase: 'done' }, effects: [] };
   }
   const events: SessionEvent[] = [...state.events];
   if (state.phase === 'work') {
@@ -175,7 +262,7 @@ function finishWork(state: PlayerState): TickResult {
       durationMs: move.restSeconds * 1000,
     });
     return {
-      state: { ...state, phase: 'rest', phaseMs: 0, events },
+      state: openPhase({ ...state, phase: 'rest', events }),
       effects: [{ kind: 'speak', text: `Rest. ${move.restSeconds} seconds.` }],
     };
   }
@@ -195,11 +282,18 @@ function startNextMove(state: PlayerState): TickResult {
   const move = state.plan.moves[moveIndex];
   const events: SessionEvent[] = [
     ...state.events,
-    { type: 'move_start', atMs: state.sessionMs, moveId: move.exercise.id, name: move.exercise.name },
+    {
+      type: 'move_start',
+      atMs: state.sessionMs,
+      moveId: move.exercise.id,
+      name: move.exercise.name,
+    },
   ];
   return {
-    state: { ...state, moveIndex, phase: 'work', phaseMs: 0, events },
-    effects: [{ kind: 'speak', text: `${move.exercise.cue} ${move.workSeconds} seconds.` }],
+    state: openPhase({ ...state, moveIndex, phase: 'work', events }),
+    effects: [
+      { kind: 'speak', text: `${move.exercise.cue} ${move.workSeconds} seconds.` },
+    ],
   };
 }
 
@@ -212,26 +306,21 @@ export function tick(state: PlayerState, deltaMs: number): TickResult {
   if (deltaMs <= 0 || state.phase === 'idle') {
     return { state, effects: [] };
   }
-  let current: PlayerState = { ...state, sessionMs: state.sessionMs + deltaMs };
   const effects: SpeakEffect[] = [];
-  if (current.phase === 'done' || current.paused) {
-    return { state: current, effects };
+  if (state.phase === 'done' || state.paused) {
+    return { state: { ...state, sessionMs: state.sessionMs + deltaMs }, effects };
   }
 
+  let current = state;
   let remainingDelta = deltaMs;
-  // Rewind sessionMs; we re-add it as we consume the delta so that events
-  // fired at phase boundaries carry the session time of the boundary itself.
-  current = { ...current, sessionMs: state.sessionMs };
-
-  while (remainingDelta > 0 && (current.phase === 'work' || current.phase === 'rest')) {
-    const move = currentMove(current);
-    const phaseTotalMs =
-      (current.phase === 'work' ? move.workSeconds : move.restSeconds) * 1000;
-    const phaseLeftMs = phaseTotalMs - current.phaseMs;
+  while (
+    remainingDelta > 0 &&
+    (current.phase === 'work' || current.phase === 'rest')
+  ) {
+    const phaseLeftMs = phaseEndSessionMs(current) - current.sessionMs;
     const step = Math.min(remainingDelta, phaseLeftMs);
-
-    const beforeLeft = phaseLeftMs;
     const afterLeft = phaseLeftMs - step;
+
     current = {
       ...current,
       sessionMs: current.sessionMs + step,
@@ -241,7 +330,7 @@ export function tick(state: PlayerState, deltaMs: number): TickResult {
 
     if (current.phase === 'work') {
       for (const s of [3, 2, 1]) {
-        if (beforeLeft > s * 1000 && afterLeft <= s * 1000) {
+        if (phaseLeftMs > s * 1000 && afterLeft <= s * 1000) {
           effects.push({ kind: 'speak', text: String(s) });
         }
       }
