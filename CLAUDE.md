@@ -29,8 +29,11 @@ is to sideload the nightly APK and train. Yours is everything else.
 ## Commands
 
 - `npm run typecheck` · `npm run lint` · `npm test` — run all three before pushing.
+  These cover the pipeline too: it is part of the root npm project, not a
+  separate package (one lockfile, one toolchain — see DECISIONS.md).
 - `npm run android` — local dev (owner's machine only; CI builds via prebuild + Gradle).
-- Pipeline (M4+): `npm --prefix pipeline test` etc. — see `pipeline/README.md` when it exists.
+- `npm run edit -- --log <session.json> --out output/` — run the auto-editor.
+  Needs ffmpeg on PATH; `--dry-run` prints the commands. See `pipeline/README.md`.
 
 ## Map
 
@@ -40,6 +43,9 @@ is to sideload the nightly APK and train. Yours is everything else.
   generator, event log). Put as much here as possible: it is the cheapest
   code to test and review.
 - `src/constants/theme.ts` — design tokens. Dark-only by decision.
+- `pipeline/` — the auto-editor. `edl.ts` (rules) and `ffmpeg.ts` (arg builders)
+  are pure and heavily tested; `run.ts` is the only part that shells out.
+  It imports `src/lib` directly — never copy the schema or exercise library.
 - `.maestro/` — E2E flows. Keep them short; the emulator job is CI's flakiest link.
 - `.github/workflows/ci.yml` — checks → APK build → Maestro → nightly release.
 

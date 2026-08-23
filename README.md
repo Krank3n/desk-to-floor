@@ -15,7 +15,7 @@ edited long-form and Shorts cuts — no on-device editing, no ML.
 | `src/app/` | expo-router routes (thin re-exports) |
 | `src/screens/` | screen components |
 | `src/lib/` | pure TS domain logic: exercises, sessions, event log |
-| `pipeline/` | auto-editor (M4) |
+| `pipeline/` | auto-editor: `npm run edit -- --log <session.json>` |
 | `.maestro/` | E2E smoke flows |
 
 ## The brain

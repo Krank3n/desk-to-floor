@@ -3,6 +3,27 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-23 — M4: the auto-editor (session 5)
+
+- `pipeline/` turns footage + event log into edited video with ffmpeg. No ML:
+  the log already says when everything happened, so the edit is arithmetic.
+- `edl.ts` (pure) decides what to keep: work intervals in, rests out, redo
+  markers discard the botched take, paused stretches split the move around the
+  dead air, sub-1s fragments dropped. Music mode rounds cuts *inward* to the
+  beat (start up, end down) applying the documented pause shift; non-music mode
+  pads 250 ms handles clamped so segments never overlap.
+- `ffmpeg.ts` (pure) builds the filter graphs: one pass that trims, concats and
+  burns move-name titles on the output timeline. Shorts are 9:16 centre crops
+  of breaking moves only (toprock / footwork / freeze), capped at 60 s.
+- Verified end to end against real ffmpeg with a synthetic session: output
+  durations matched the plan to the frame, Shorts came out 1080×1920, titles
+  burned correctly.
+- 89 tests / 12 suites (24 new for the pipeline). The app is unchanged, so
+  **no versionCode bump** — the nightly APK stays v0.4.0.
+- **Nothing to check in the APK this time.** To try the editor on a real
+  session: pull a session off your phone and run
+  `npm run edit -- --log <session.json> --out output/` (needs `brew install ffmpeg`).
+
 ## 2026-08-21 — M3: music + music mode (same-day, session 4)
 
 - New **Music** screen (Settings → Music & beat grid): pick a local track with

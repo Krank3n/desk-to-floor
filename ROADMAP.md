@@ -49,12 +49,12 @@ its tests pass and CI is green on `main`.
 
 ## M4 — Auto-editor (`pipeline/`, Node + TypeScript + system ffmpeg)
 
-- [ ] Ingest raw video + event log; validate schema version
-- [ ] Trim dead time and redone takes
-- [ ] Cut per move; burn move-name titles (drawtext)
-- [ ] Beat-synced cuts when a beat grid is present
-- [ ] Export 16:9 long-form assembly
-- [ ] Export 9:16 Shorts crops of highlight moves
+- [x] Ingest raw video + event log; validate schema version
+- [x] Trim dead time and redone takes
+- [x] Cut per move; burn move-name titles (drawtext)
+- [x] Beat-synced cuts when a beat grid is present
+- [x] Export 16:9 long-form assembly
+- [x] Export 9:16 Shorts crops of highlight moves
 
 ## M5 — AI programming
 

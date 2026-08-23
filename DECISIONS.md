@@ -31,4 +31,12 @@ One line per decision. Never re-litigate; supersede with a new dated entry.
 - **2026-08-21** Player phase ends are computed in session-time arithmetic (`phaseEndSessionMs`), not by accumulating ticks — required for exact phrase snapping, and pause-proof.
 - **2026-08-21** Pause re-anchors the beat grid by the paused duration (music pauses with the workout); the editor reconstructs the shift from pause/resume events rather than the log carrying a second anchor.
 - **2026-08-21** Music playback does not loop — a loop restart would desync phrase alignment from the extrapolated grid. Track ends, music stops, session continues.
+- **2026-08-23** The pipeline lives in `pipeline/` but inside the ROOT npm project (supersedes the kickoff's `npm --prefix pipeline` sketch) — one lockfile, one toolchain, one CI install step. Rule 1 is keeping CI green; a second package is a second thing to break.
+- **2026-08-23** The pipeline imports the app's `src/lib` directly (event log types, exercise library) rather than duplicating them. The schema is the contract; a copy would drift silently.
+- **2026-08-23** Auto-editor split: pure planner (`edl.ts`) → pure arg builders (`ffmpeg.ts`) → thin executor (`run.ts`). Every editing rule is unit-testable with no video, so CI never needs ffmpeg.
+- **2026-08-23** One-pass ffmpeg (trim + concat + drawtext in a single filter graph), no intermediate files. Sessions are ~10–15 segments; revisit only if a graph gets unwieldy.
+- **2026-08-23** Music-mode cuts round INWARD to the beat (start up, end down) — never outward, which would bleed into a rest or a paused stretch.
+- **2026-08-23** Handles (250 ms) apply only outside music mode; in music mode the beat *is* the intended edit point and already absorbs camera latency.
+- **2026-08-23** Shorts are cut only from toprock/footwork/freeze moves — the breaking content is what the channel's Shorts are for; wrist prep is not a hook.
+- **2026-08-23** drawtext apostrophes are replaced with typographic ’ rather than fighting ffmpeg's nested quoting. Looks better and removes an escaping failure mode.
 - **2026-08-21** Filling the event log's `music` placeholder is NOT a schema bump (EVENTLOG.md pre-authorised it at kickoff and no consumer has shipped) — reasoning recorded in EVENTLOG.md's version history rather than inflating to v2.
