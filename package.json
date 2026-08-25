@@ -9,10 +9,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "edit": "tsx pipeline/bin.ts"
+    "edit": "tsx pipeline/bin.ts",
+    "bundle": "expo export --platform android --output-dir .bundle-check"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.120.0",
     "@expo/vector-icons": "^15.0.2",
     "expo": "~57.0.15",
     "expo-audio": "~57.0.4",

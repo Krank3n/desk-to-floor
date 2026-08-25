@@ -52,3 +52,6 @@ output/
 # test/build output
 coverage/
 maestro-logs/
+
+# local bundle verification output
+.bundle-check/

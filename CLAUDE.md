@@ -58,6 +58,12 @@ is to sideload the nightly APK and train. Yours is everything else.
 - The app must keep working fully offline. No external services in v1.
 - Bump `android.versionCode` in app.json whenever the user-visible app changes,
   so sideloaded upgrades install cleanly.
+- **Adding a dependency? Run `npm run bundle` before pushing.** typecheck, lint
+  and tests all run in Node, where Node built-ins resolve fine — Metro is the
+  only thing that catches a package importing `node:fs`. `expo prebuild`
+  doesn't bundle JS either, so the failure lands in CI's Gradle stage
+  (`createBundleReleaseJsAndAssets`) minutes later. This has bitten once
+  already (the Anthropic SDK, M5).
 - `expo prebuild` rewrites `tsconfig.json` as a side effect (it reformats and
   drops the `.expo/types` / `expo-env.d.ts` includes). If you run prebuild
   locally, check `git diff tsconfig.json` and revert that noise before

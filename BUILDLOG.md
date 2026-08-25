@@ -23,7 +23,11 @@ checking in the next APK.
   moves were all junk is skipped. A response that is entirely unusable throws
   rather than half-running.
 - Uses claude-opus-5 with adaptive thinking, high effort, and a JSON schema
-  constraining the response shape.
+  constraining the response shape, called over plain `fetch`. The official
+  `@anthropic-ai/sdk` was tried first and removed: it imports `node:fs`, which
+  Metro can't resolve, so it broke the release bundle. Added `npm run bundle`
+  and a CLAUDE.md rule so the next dependency gets caught locally instead of
+  in CI.
 - 137 tests / 18 suites (46 new). New `.maestro/coach.yaml` checks the key gate
   without ever making a billed call. versionCode 6, v0.5.0.
 - **Check in the APK:** Settings → AI coach → paste your key → Generate. Then
