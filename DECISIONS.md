@@ -40,3 +40,5 @@ One line per decision. Never re-litigate; supersede with a new dated entry.
 - **2026-08-23** Shorts are cut only from toprock/footwork/freeze moves — the breaking content is what the channel's Shorts are for; wrist prep is not a hook.
 - **2026-08-23** drawtext apostrophes are replaced with typographic ’ rather than fighting ffmpeg's nested quoting. Looks better and removes an escaping failure mode.
 - **2026-08-21** Filling the event log's `music` placeholder is NOT a schema bump (EVENTLOG.md pre-authorised it at kickoff and no consumer has shipped) — reasoning recorded in EVENTLOG.md's version history rather than inflating to v2.
+- **2026-08-25** `training-log.ts` computes actual work time with its own small pause-span helper rather than importing `pipeline/src/edl.ts`'s — the pipeline depends on `src/lib`, never the other way, so duplicating ~10 lines of pure arithmetic beat inverting that dependency for one function.
+- **2026-08-25** `formatTrainingLog` orders sessions oldest-first — the M5 coach prompt reads as a progression story, not a most-recent-first feed.

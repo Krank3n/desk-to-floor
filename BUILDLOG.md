@@ -3,6 +3,19 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-25 — M5 groundwork: training-log summary format
+
+- `src/lib/training-log.ts` (pure): turns an event log into a coach-readable
+  summary — per move, actual work seconds vs. planned (redo takes discarded,
+  paused time subtracted), redo count, and whether the move was completed
+  before the session ended. `formatTrainingLog` renders one or more sessions,
+  oldest first, as plain text meant to be dropped straight into the coach
+  prompt the next M5 item will build.
+- No UI, no schema change, no versionCode bump — this is data plumbing for
+  the Claude API step that comes next in M5, not a user-facing feature yet.
+- 7 new tests / 14 suites, 97 total.
+- **Nothing to check in the APK this time.**
+
 ## 2026-08-23 — Device testing on the iOS simulator; done-screen copy fix
 
 - Ran the current build on the DTF-Dev simulator (Expo Go, Metro :8083) and
