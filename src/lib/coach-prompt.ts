@@ -42,6 +42,11 @@ export const COACH_SYSTEM_PROMPT = [
   'seconds versus planned, redo counts, and whether sessions were completed.',
   'Repeated redos on a move mean it is too hard — regress it or cut volume.',
   'Consistently completing everything means he is ready for more.',
+  '',
+  'The user message includes computed progression signals: a per-move',
+  'increase/hold/regress call with a suggested work-second delta, derived in',
+  'code from the most recent time each move was logged. Treat these as a',
+  'floor, not a ceiling — you may deviate, but say why in `notes`.',
 ].join('\n');
 
 /** The library, rendered for the prompt. Deterministic ordering. */
@@ -58,12 +63,14 @@ export interface CoachRequestInput {
   week: number;
   /** Output of formatTrainingLog(), or a "no sessions" line. */
   trainingLog: string;
+  /** Output of formatProgressionNotes(), computed from the same log. */
+  progressionNotes?: string;
   /** Sessions to program for the week. */
   sessionsPerWeek?: number;
 }
 
 export function buildCoachUserMessage(input: CoachRequestInput): string {
-  const { week, trainingLog, sessionsPerWeek = 3 } = input;
+  const { week, trainingLog, progressionNotes, sessionsPerWeek = 3 } = input;
   const phase = phaseForWeek(week);
   return [
     `Program week: ${week} (${phase} block)`,
@@ -76,6 +83,7 @@ export function buildCoachUserMessage(input: CoachRequestInput): string {
     'Training log so far:',
     trainingLog,
     '',
+    progressionNotes ?? '',
     `Program ${sessionsPerWeek} sessions for this week. For each session give`,
     'an ordered list of moves with work and rest seconds. Open every session',
     'with wrist prep. In `notes`, explain in two or three sentences what you',

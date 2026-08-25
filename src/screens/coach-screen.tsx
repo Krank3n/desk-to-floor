@@ -22,6 +22,7 @@ import {
 import { CoachWeek } from '@/lib/coach-plan';
 import { generateCoachWeek } from '@/lib/coach-client';
 import { loadCoachWeek, saveCoachWeek } from '@/lib/coach-store';
+import { computeMoveProgressions, formatProgressionNotes } from '@/lib/progression';
 import { listEventLogs } from '@/lib/session-store';
 import { buildSessionTrainingLog, formatTrainingLog } from '@/lib/training-log';
 
@@ -67,11 +68,14 @@ export default function CoachScreen() {
     setError(null);
     try {
       const logs = await listEventLogs();
-      const trainingLog = formatTrainingLog(logs.map(buildSessionTrainingLog));
+      const sessionLogs = logs.map(buildSessionTrainingLog);
+      const trainingLog = formatTrainingLog(sessionLogs);
+      const progressionNotes = formatProgressionNotes(computeMoveProgressions(sessionLogs));
       const generated = await generateCoachWeek({
         apiKey: storedKey,
         week,
         trainingLog,
+        progressionNotes,
       });
       await saveCoachWeek(generated);
       setPlan(generated);

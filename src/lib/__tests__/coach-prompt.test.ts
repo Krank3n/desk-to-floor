@@ -52,6 +52,16 @@ describe('buildCoachUserMessage', () => {
   it('is deterministic for the same input', () => {
     expect(buildCoachUserMessage(base)).toBe(buildCoachUserMessage(base));
   });
+
+  it('includes progression notes when given, and omits the section when not', () => {
+    const withNotes = buildCoachUserMessage({
+      ...base,
+      progressionNotes: 'Computed progression signals (code-derived from the log, a floor not a ceiling):\n- Wrist rocks (wrist-rocks): increase (+5s) — clean completion at full volume — ready for more',
+    });
+    expect(withNotes).toContain('Computed progression signals');
+    expect(withNotes).toContain('wrist-rocks): increase');
+    expect(buildCoachUserMessage(base)).not.toContain('Computed progression signals');
+  });
 });
 
 describe('COACH_RESPONSE_SCHEMA', () => {

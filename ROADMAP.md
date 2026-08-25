@@ -60,7 +60,7 @@ its tests pass and CI is green on `main`.
 
 - [x] Training-log summary format the coach can consume
 - [x] Claude API weekly workout generation from training log + 12-week program
-- [ ] Weekly progression: adjust volume/progressions from logged sessions
+- [x] Weekly progression: adjust volume/progressions from logged sessions
 - [x] Key-handling: API key entered on device, stored securely, never committed
 
 ## M6 — Polish

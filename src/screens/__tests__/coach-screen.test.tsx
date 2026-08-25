@@ -116,6 +116,11 @@ describe('CoachScreen', () => {
       expect(screen.getByText(/floor work starts this week/)).toBeOnTheScreen();
       expect(screen.getByText('Get down · Day 1')).toBeOnTheScreen();
       expect(screen.getByText(/Wrist rocks — 40s/)).toBeOnTheScreen();
+      expect(generateCoachWeek).toHaveBeenCalledWith(
+        expect.objectContaining({
+          progressionNotes: expect.stringContaining('No prior sessions'),
+        }),
+      );
     });
 
     it('surfaces an API failure instead of failing silently', async () => {

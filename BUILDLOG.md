@@ -3,6 +3,28 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-25 — M5: code-computed weekly progression signals
+
+- Until now the coach's progression call was pure LLM judgement — the prompt
+  said "progress off the evidence" but nothing checked that it actually did.
+  New `src/lib/progression.ts` (pure, 12 tests) computes a deterministic
+  increase/hold/regress signal per move from the *most recent* time it was
+  logged: incomplete or 2+ redos regresses (~15% of planned work seconds,
+  min 5s, rounded to the nearest 5s), exactly one redo or finishing under
+  time holds, a clean full-time completion increases.
+- Wired into the coach prompt as a new "Computed progression signals" section
+  (`coach-prompt.ts`), sitting alongside the full training log. The system
+  prompt now tells the model to treat it as a floor it can deviate from, but
+  must explain any deviation in `notes` — same "code enforces, prompt
+  requests" split as the existing safety rails in `coach-plan.ts`.
+- No schema change, no new UI, no versionCode bump — this only changes what
+  goes into the request the coach screen already sends.
+- 158 tests / 20 suites (12 new). `coach-screen.test.tsx` asserts the
+  progression notes are actually passed through to `generateCoachWeek`.
+- **Check in the APK:** next time you generate a week in Settings → AI coach,
+  read the `notes` — see whether the coach's stated reasoning lines up with
+  what the computed signals would have suggested, or explains why it didn't.
+
 ## 2026-08-25 — M5: the AI coach actually programs your week
 
 - **Settings → AI coach**: paste your Anthropic key (validated for shape,
