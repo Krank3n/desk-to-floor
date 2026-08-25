@@ -55,6 +55,14 @@ export default function SettingsScreen() {
             <Text style={styles.rowLabel}>Music &amp; beat grid</Text>
             <Text style={styles.rowValue}>{describeMusic(music)} ›</Text>
           </Pressable>
+          <Pressable
+            style={styles.row}
+            onPress={() => router.push('/coach')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.rowLabel}>AI coach</Text>
+            <Text style={styles.rowValue}>Claude programming ›</Text>
+          </Pressable>
           <Row label="Version" value={version} />
           <Row label="Channel" value="nightly" />
           <Row label="Event log schema" value="v1" />

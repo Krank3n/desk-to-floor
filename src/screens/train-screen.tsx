@@ -1,13 +1,31 @@
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/constants/theme';
+import { loadTodaysPlan } from '@/lib/coach-store';
 import { generateSession } from '@/lib/session';
 
 export default function TrainScreen() {
   const router = useRouter();
-  const plan = generateSession();
+  const [plan, setPlan] = useState(() => generateSession());
+  const [fromCoach, setFromCoach] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      loadTodaysPlan().then((today) => {
+        if (!active) return;
+        setPlan(today.plan);
+        setFromCoach(today.fromCoach);
+      });
+      return () => {
+        active = false;
+      };
+    }, []),
+  );
+
   const minutes = Math.round(plan.totalSeconds / 60);
 
   return (
@@ -21,7 +39,9 @@ export default function TrainScreen() {
         </Text>
 
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>TODAY&apos;S SESSION</Text>
+          <Text style={styles.cardLabel}>
+            {fromCoach ? 'PROGRAMMED BY YOUR COACH' : "TODAY'S SESSION"}
+          </Text>
           <Text style={styles.cardTitle}>{plan.name}</Text>
           <Text style={styles.cardBody}>
             {plan.moves.length} moves · about {minutes} min ·{' '}

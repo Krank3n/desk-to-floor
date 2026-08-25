@@ -13,6 +13,7 @@ import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/constants/theme';
+import { loadTodaysPlan } from '@/lib/coach-store';
 import { buildEventLog, MusicInfo, newSessionId } from '@/lib/eventlog';
 import { BeatGrid } from '@/lib/music';
 import {
@@ -56,6 +57,21 @@ export default function WorkoutScreen() {
   useEffect(() => {
     stateRef.current = state;
   });
+  // Prefer the coach's session once a week has been generated. Only swapped in
+  // while still idle — never mid-session.
+  useEffect(() => {
+    let active = true;
+    loadTodaysPlan().then((today) => {
+      if (!active || !today.fromCoach) return;
+      setState((current) =>
+        current.phase === 'idle' ? createPlayer(today.plan) : current,
+      );
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const sessionMeta = useRef({ id: '', startedAt: '' });
   const saved = useRef(false);
   const [saveResult, setSaveResult] = useState<{

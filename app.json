@@ -2,7 +2,7 @@
   "expo": {
     "name": "Desk to Floor",
     "slug": "desk-to-floor",
-    "version": "0.4.1",
+    "version": "0.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "desktofloor",
@@ -10,7 +10,7 @@
     "backgroundColor": "#0B0F14",
     "android": {
       "package": "com.hansendev.desktofloor",
-      "versionCode": 5,
+      "versionCode": 6,
       "adaptiveIcon": {
         "backgroundColor": "#0B0F14",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -36,7 +36,8 @@
           "imageWidth": 76
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      "expo-secure-store"
     ]
   }
 }

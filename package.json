@@ -1,6 +1,6 @@
 {
   "name": "desk-to-floor",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "main": "expo-router/entry",
   "private": true,
   "scripts": {
@@ -12,6 +12,7 @@
     "edit": "tsx pipeline/bin.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@expo/vector-icons": "^15.0.2",
     "expo": "~57.0.15",
     "expo-audio": "~57.0.4",
@@ -22,6 +23,7 @@
     "expo-keep-awake": "~57.0.1",
     "expo-linking": "~57.0.7",
     "expo-router": "~57.0.15",
+    "expo-secure-store": "~57.0.1",
     "expo-speech": "~57.0.1",
     "expo-splash-screen": "~57.0.7",
     "expo-status-bar": "~57.0.1",

@@ -59,9 +59,9 @@ its tests pass and CI is green on `main`.
 ## M5 — AI programming
 
 - [x] Training-log summary format the coach can consume
-- [ ] Claude API weekly workout generation from training log + 12-week program
+- [x] Claude API weekly workout generation from training log + 12-week program
 - [ ] Weekly progression: adjust volume/progressions from logged sessions
-- [ ] Key-handling: API key entered on device, stored securely, never committed
+- [x] Key-handling: API key entered on device, stored securely, never committed
 
 ## M6 — Polish
 

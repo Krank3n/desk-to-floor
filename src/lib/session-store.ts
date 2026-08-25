@@ -54,6 +54,24 @@ export async function saveSession(
   return path;
 }
 
+/** Full logs, oldest first — what the coach reads (M5). */
+export async function listEventLogs(): Promise<EventLog[]> {
+  const dir = sessionsDir();
+  const names = await FileSystem.readDirectoryAsync(dir).catch(
+    () => [] as string[],
+  );
+  const logs: EventLog[] = [];
+  for (const name of names) {
+    if (!name.endsWith('.json')) continue;
+    try {
+      logs.push(parseEventLog(await FileSystem.readAsStringAsync(dir + name)));
+    } catch {
+      // Unreadable or future-schema file: skip rather than fail the batch.
+    }
+  }
+  return logs.sort((a, b) => (a.startedAt < b.startedAt ? -1 : 1));
+}
+
 export async function listSessionSummaries(): Promise<SessionSummary[]> {
   const dir = sessionsDir();
   const names = await FileSystem.readDirectoryAsync(dir).catch(

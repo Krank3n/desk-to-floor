@@ -3,6 +3,34 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-25 — M5: the AI coach actually programs your week
+
+- **Settings → AI coach**: paste your Anthropic key (validated for shape,
+  stored in the platform keystore via expo-secure-store, shown masked, never
+  written to a file or the event log), pick the program week, generate.
+- Claude reads the training log built in the previous run — actual work
+  seconds vs. planned, redo counts, completions — plus the 12-week block brief
+  and the exercise library, and returns a week of sessions with a short note
+  explaining what it changed and why. That note is the "the AI changed my
+  program this week" segment, straight off the screen.
+- The generated week is saved, and the Train and Workout screens use the
+  coach's first session when one exists (the card says "PROGRAMMED BY YOUR
+  COACH"), falling back to the built-in templates otherwise.
+- **Safety rails are in code, not just the prompt** (`coach-plan.ts`): a move
+  id the library doesn't have is dropped and reported rather than run, wrist
+  prep is forced to the front of every session (reordered, or prepended if the
+  coach forgot), durations are clamped to sane bounds, and a session whose
+  moves were all junk is skipped. A response that is entirely unusable throws
+  rather than half-running.
+- Uses claude-opus-5 with adaptive thinking, high effort, and a JSON schema
+  constraining the response shape.
+- 137 tests / 18 suites (46 new). New `.maestro/coach.yaml` checks the key gate
+  without ever making a billed call. versionCode 6, v0.5.0.
+- **Check in the APK:** Settings → AI coach → paste your key → Generate. Then
+  go to Train and confirm the session card says it came from the coach. Read
+  its note and see whether the reasoning actually holds up against what you
+  did last week — that judgement is the part I can't test.
+
 ## 2026-08-25 — M5 groundwork: training-log summary format
 
 - `src/lib/training-log.ts` (pure): turns an event log into a coach-readable
