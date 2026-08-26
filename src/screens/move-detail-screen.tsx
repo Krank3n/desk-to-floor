@@ -20,6 +20,13 @@ import {
 
 type Mode = 'loading' | 'record' | 'preview';
 
+/**
+ * Stopping the camera the instant it starts is a native-layer race (the
+ * recorder can reject or hang before it has anything to finalize) — enforce
+ * a floor so `recordAsync()` always has something real to encode.
+ */
+const MIN_RECORD_MS = 1200;
+
 /** Its own component so useVideoPlayer gets a fresh instance on retake (`key`). */
 function ClipPreview({ uri }: { uri: string }) {
   const player = useVideoPlayer(uri);
@@ -62,7 +69,9 @@ export default function MoveDetailScreen() {
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const cameraRef = useRef<CameraView>(null);
   const recordingResult = useRef<Promise<string | null> | null>(null);
+  const recordingStartedAt = useRef(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
 
   const permissionsGranted =
     (camPermission?.granted ?? false) && (micPermission?.granted ?? false);
@@ -79,6 +88,7 @@ export default function MoveDetailScreen() {
   const handleStartRecording = () => {
     if (!cameraRef.current) return;
     try {
+      recordingStartedAt.current = Date.now();
       recordingResult.current = cameraRef.current
         .recordAsync()
         .then((video) => video?.uri ?? null)
@@ -90,9 +100,15 @@ export default function MoveDetailScreen() {
   };
 
   const handleStopRecording = async () => {
+    setIsStopping(true);
+    const elapsed = Date.now() - recordingStartedAt.current;
+    if (elapsed < MIN_RECORD_MS) {
+      await new Promise((resolve) => setTimeout(resolve, MIN_RECORD_MS - elapsed));
+    }
     cameraRef.current?.stopRecording();
     const uri = recordingResult.current ? await recordingResult.current : null;
     setIsRecording(false);
+    setIsStopping(false);
     if (!uri) return;
     await saveReferenceClip(id, uri);
     setRefreshToken((t) => t + 1);
@@ -177,7 +193,7 @@ export default function MoveDetailScreen() {
           <Pressable
             style={styles.primaryButton}
             onPress={isRecording ? handleStopRecording : handleStartRecording}
-            disabled={!cameraActive}
+            disabled={!cameraActive || isStopping}
             accessibilityRole="button"
           >
             <Text style={styles.primaryButtonText}>

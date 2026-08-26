@@ -3,6 +3,23 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-26 — fix: CI red on the M6 push (same-day follow-up)
+
+- The `moves` Maestro flow failed on GitHub Actions: `[Failed] moves (33s)
+  (Assertion is false: "Retake" is visible)`. Everything else (typecheck,
+  lint, 173 tests, the Gradle APK build) was green; only the emulator flow
+  broke, and only on this new flow — coach/smoke/workout/music all passed
+  in the same run.
+- Root cause: the flow tapped Start recording then Stop recording back to
+  back, and `recordAsync()` never resolved to a file — stopping the camera
+  the instant it starts is a native-layer race, not a Maestro timing quirk.
+  `move-detail-screen.tsx` now enforces a 1.2s minimum recording duration
+  before calling `stopRecording()`, which also happens to be the right call
+  for real usage (a near-zero-length reference clip is useless).
+- Bumped the Maestro flow's post-stop timeout 15s → 20s to cover the added
+  wait. Re-ran typecheck/lint/test locally (still 173/173); watching the
+  next CI run to confirm the emulator job goes green.
+
 ## 2026-08-26 — M6: move reference clips
 
 - First M6 item: Settings → "Move reference clips" opens a list of every

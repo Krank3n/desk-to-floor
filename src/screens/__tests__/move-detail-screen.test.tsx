@@ -56,7 +56,15 @@ jest.mock('expo-video', () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   mockParams = { id: 'crow-hold' };
+  // Skip the real minimum-recording-duration wait. Any two Date.now() reads
+  // the component takes must look far apart, however many extra calls RNTL
+  // makes in between — so count up in large, unmistakable steps rather than
+  // assuming which call is "the" start/stop read.
+  let tick = 0;
+  jest.spyOn(Date, 'now').mockImplementation(() => (tick++) * 1_000_000);
 });
+
+afterEach(() => jest.restoreAllMocks());
 
 describe('MoveDetailScreen', () => {
   it('shows the record view with the move cue when no clip is saved', async () => {
