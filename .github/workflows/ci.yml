@@ -47,7 +47,9 @@ jobs:
       - name: Expo prebuild (android)
         run: npx expo prebuild --platform android --no-install
       - name: Raise Gradle/dexer heap
-        run: echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> android/gradle.properties
+        # expo prebuild's generated gradle.properties has no trailing newline —
+        # printf's leading \n guards against gluing onto its last property.
+        run: printf '\norg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m\n' >> android/gradle.properties
       - name: Gradle assembleRelease
         run: cd android && ./gradlew assembleRelease --no-daemon
       - uses: actions/upload-artifact@v4

@@ -3,6 +3,24 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-26 — fix: the OOM fix itself broke the build (same-day follow-up 3)
+
+- Third red run in a row on the M6 push. This one was self-inflicted: the
+  previous fix appended `org.gradle.jvmargs=...` to `android/gradle.properties`
+  with a plain `echo >>`, but that file has no trailing newline — the append
+  glued onto the last property's value (`expo.inlineModules.watchedDirectories
+  =[]org.gradle.jvmargs=...`), corrupting it and breaking a node subprocess the
+  Expo Gradle plugin runs during configuration (`Process 'command 'node''
+  finished with non-zero exit value 1`, no further detail).
+- Reproduced locally by actually regenerating `android/gradle.properties` with
+  `expo prebuild` and checking it byte-for-byte before trusting the next fix,
+  rather than reasoning about it in the abstract. Switched to
+  `printf '\n%s\n' ... >>`, which guarantees the new property lands on its own
+  line regardless of what the file ends with.
+- No app code changed; typecheck/lint/test still 173/173 (also caught
+  `package-lock.json` still saying version 0.5.0 from the versionCode-7 bump —
+  synced by `npm install`). Watching the next run.
+
 ## 2026-08-26 — fix: CI red again, this time a Gradle OOM (same-day follow-up 2)
 
 - The re-run after the Maestro fix got past Maestro entirely and died
