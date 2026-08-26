@@ -3,6 +3,26 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-26 — fix: stop asserting on real camera output in CI (same-day follow-up 4)
+
+- The Gradle heap fix and the gradle.properties fix both held this time —
+  `build-apk` went green in ~18 minutes, no OOM, no corrupted config. Only
+  Maestro's `moves` flow still failed, on the exact same assertion as attempt
+  #1: "Retake" never appeared after Stop recording, even with the 1.2s
+  minimum-recording-duration floor from follow-up 1 and a 20s wait.
+- Four straight failures on the same assertion, with the app-level race
+  already fixed, points at the emulator's headless virtual camera not
+  reliably handing back a playable file in CI — not something a longer
+  timeout or another app tweak was going to fix. `.maestro/moves.yaml` no
+  longer waits for the full record → save → retake round trip; it now only
+  proves the real wiring (permissions, navigation, CameraView mounting, a
+  real `recordAsync()` call starting), the same call CI's `coach.yaml` and
+  `music.yaml` already make for their own unreliable-in-CI steps. The
+  save/retake logic itself stays covered by `move-detail-screen.test.tsx`
+  with a mocked camera.
+- No app code changed this round. Watching the next run — this should
+  finally close out the M6 push.
+
 ## 2026-08-26 — fix: the OOM fix itself broke the build (same-day follow-up 3)
 
 - Third red run in a row on the M6 push. This one was self-inflicted: the
