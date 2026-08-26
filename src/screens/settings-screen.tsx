@@ -5,11 +5,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/constants/theme';
+import { EXERCISES } from '@/lib/exercises';
 import {
   DEFAULT_MUSIC_SETTINGS,
   loadMusicSettings,
   MusicSettings,
 } from '@/lib/music-settings';
+import { listReferenceClipIds } from '@/lib/reference-clips-store';
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -29,12 +31,16 @@ export default function SettingsScreen() {
   const router = useRouter();
   const version = Constants.expoConfig?.version ?? 'unknown';
   const [music, setMusic] = useState<MusicSettings>(DEFAULT_MUSIC_SETTINGS);
+  const [clipCount, setClipCount] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
       loadMusicSettings().then((loaded) => {
         if (active) setMusic(loaded);
+      });
+      listReferenceClipIds().then((ids) => {
+        if (active) setClipCount(ids.size);
       });
       return () => {
         active = false;
@@ -62,6 +68,16 @@ export default function SettingsScreen() {
           >
             <Text style={styles.rowLabel}>AI coach</Text>
             <Text style={styles.rowValue}>Claude programming ›</Text>
+          </Pressable>
+          <Pressable
+            style={styles.row}
+            onPress={() => router.push('/moves')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.rowLabel}>Move reference clips</Text>
+            <Text style={styles.rowValue}>
+              {clipCount} of {EXERCISES.length} saved ›
+            </Text>
           </Pressable>
           <Row label="Version" value={version} />
           <Row label="Channel" value="nightly" />

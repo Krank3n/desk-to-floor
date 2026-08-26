@@ -1,0 +1,48 @@
+# M6 flow: record a move reference clip, see it persist, then retake it.
+appId: com.hansendev.desktofloor
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 60000
+- tapOn: 'Settings'
+- extendedWaitUntil:
+    visible: 'Move reference clips'
+    timeout: 10000
+- tapOn: 'Move reference clips'
+- extendedWaitUntil:
+    visible: 'Wrist rocks'
+    timeout: 10000
+- tapOn: 'Wrist rocks'
+- extendedWaitUntil:
+    visible: 'Start recording'
+    timeout: 10000
+- tapOn: 'Start recording'
+- extendedWaitUntil:
+    visible: 'Stop recording'
+    timeout: 10000
+- tapOn: 'Stop recording'
+- extendedWaitUntil:
+    visible: 'Retake'
+    timeout: 15000
+- tapOn: 'Back'
+- extendedWaitUntil:
+    visible: 'Saved'
+    timeout: 10000
+- tapOn: 'Wrist rocks'
+- extendedWaitUntil:
+    visible: 'Retake'
+    timeout: 10000
+- tapOn: 'Retake'
+- extendedWaitUntil:
+    visible: 'Start recording'
+    timeout: 10000
+- tapOn: 'Back'
+- extendedWaitUntil:
+    visible: 'Move reference clips'
+    timeout: 10000
+- tapOn: 'Back'
+- extendedWaitUntil:
+    visible: 'Settings'
+    timeout: 10000

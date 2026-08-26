@@ -1,5 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react-native';
 
+import { EXERCISES } from '@/lib/exercises';
+import { listReferenceClipIds } from '@/lib/reference-clips-store';
 import { listSessionSummaries } from '@/lib/session-store';
 import SessionsScreen from '@/screens/sessions-screen';
 import SettingsScreen from '@/screens/settings-screen';
@@ -17,6 +19,10 @@ jest.mock('expo-router', () => {
 jest.mock('@/lib/session-store', () => ({
   listSessionSummaries: jest.fn().mockResolvedValue([]),
   saveSession: jest.fn().mockResolvedValue('mock://saved'),
+}));
+
+jest.mock('@/lib/reference-clips-store', () => ({
+  listReferenceClipIds: jest.fn().mockResolvedValue(new Set()),
 }));
 
 jest.mock('@/lib/music-settings', () => ({
@@ -78,5 +84,15 @@ describe('SettingsScreen', () => {
     expect(screen.getByText('Version')).toBeOnTheScreen();
     expect(screen.getByText('Channel')).toBeOnTheScreen();
     expect(screen.getByText('nightly')).toBeOnTheScreen();
+  });
+
+  it('shows how many moves have a saved reference clip', async () => {
+    (listReferenceClipIds as jest.Mock).mockResolvedValueOnce(
+      new Set(['wrist-rocks', 'crow-hold']),
+    );
+    await render(<SettingsScreen />);
+    expect(
+      await screen.findByText(`2 of ${EXERCISES.length} saved ›`),
+    ).toBeOnTheScreen();
   });
 });

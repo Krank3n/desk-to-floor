@@ -3,6 +3,26 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-26 — M6: move reference clips
+
+- First M6 item: Settings → "Move reference clips" opens a list of every
+  exercise, each showing whether you've saved a reference clip for it. Tap a
+  move to film one with the front camera; tap it again to play the saved
+  clip back with native controls, or hit Retake to redo it.
+- Clips are self-filmed on-device only — no bundled footage, no external
+  service — stored at `reference-clips/ref-<moveId>.mp4`, separate from
+  session footage since they persist across workouts instead of stacking up
+  one-per-session (`reference-clips-store.ts`, mirrors `session-store.ts`).
+- New dependency: `expo-video`, used only for local playback
+  (`useVideoPlayer` + `VideoView` with native controls). `npm run bundle`
+  passes, so Metro is fine with it.
+- 15 new tests (store + both screens + the Settings row), 173 total. New Maestro flow
+  `.maestro/moves.yaml`: record a clip, confirm it's marked Saved after
+  navigating away and back, retake it. versionCode 7 / v0.6.0.
+- **Check in the APK:** Settings → Move reference clips → pick a move →
+  Start recording → Stop recording → the clip should play back with normal
+  video controls, and Retake should let you redo it.
+
 ## 2026-08-25 — M5: code-computed weekly progression signals
 
 - Until now the coach's progression call was pure LLM judgement — the prompt
