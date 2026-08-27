@@ -79,6 +79,14 @@ export default function SettingsScreen() {
               {clipCount} of {EXERCISES.length} saved ›
             </Text>
           </Pressable>
+          <Pressable
+            style={styles.row}
+            onPress={() => router.push('/progress')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.rowLabel}>Progress stats</Text>
+            <Text style={styles.rowValue}>›</Text>
+          </Pressable>
           <Row label="Version" value={version} />
           <Row label="Channel" value="nightly" />
           <Row label="Event log schema" value="v1" />

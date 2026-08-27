@@ -1,0 +1,22 @@
+# M6 flow: reach Progress stats from Settings and confirm every tracked
+# move renders with its empty-state copy on a fresh install (no sessions
+# logged yet, so every card reads "No sessions logged yet").
+appId: com.hansendev.desktofloor
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 60000
+- tapOn: 'Settings'
+- extendedWaitUntil:
+    visible: 'Progress stats'
+    timeout: 10000
+- tapOn: 'Progress stats'
+- extendedWaitUntil:
+    visible: 'Crow hold'
+    timeout: 10000
+- tapOn: 'Back'
+- extendedWaitUntil:
+    visible: 'Settings'
+    timeout: 10000

@@ -95,4 +95,9 @@ describe('SettingsScreen', () => {
       await screen.findByText(`2 of ${EXERCISES.length} saved ›`),
     ).toBeOnTheScreen();
   });
+
+  it('has a row linking to progress stats', async () => {
+    await render(<SettingsScreen />);
+    expect(screen.getByText('Progress stats')).toBeOnTheScreen();
+  });
 });

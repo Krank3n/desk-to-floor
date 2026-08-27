@@ -66,6 +66,6 @@ its tests pass and CI is green on `main`.
 ## M6 — Polish
 
 - [x] Move reference clips
-- [ ] Progress stats (wrist range, squat hold, crow hold, 6-step tempo)
+- [x] Progress stats (wrist range, squat hold, crow hold, 6-step tempo)
 - [ ] Export presets
 - [ ] Session gallery

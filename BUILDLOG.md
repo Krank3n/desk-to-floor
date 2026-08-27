@@ -3,6 +3,25 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-27 — M6: progress stats — wrist range, squat hold, crow hold, 6-step tempo
+
+- CI was green on `main` and no `FEEDBACK:` issues were open, so this run
+  took the next M6 item.
+- `src/lib/progress-stats.ts` (pure): turns the existing training log into a
+  per-move history for four tracked moves (wrist rocks, deep squat hold, crow
+  hold, six-step half speed) — oldest-first list of session/seconds/redos,
+  plus best, latest, and delta-since-first. No new event-log fields, no
+  schema bump: it's built entirely from `actualWorkSeconds`, already computed
+  by `training-log.ts` from data the app has logged since M1.
+- Settings → "Progress stats" opens a new screen listing all four moves, each
+  showing its best/latest/delta and its five most recent sessions, or "No
+  sessions logged yet" until the move has been trained.
+- 6 new lib tests + 4 new screen tests (183 total). New Maestro flow
+  `.maestro/progress.yaml`. versionCode 8 / v0.7.0.
+- **Check in the APK:** Settings → Progress stats shows all four moves (empty
+  on a fresh install); after training wrist rocks, squat hold, crow hold, or
+  6-step, its card should show a real best/latest number.
+
 ## 2026-08-26 — fix: stop asserting on real camera output in CI (same-day follow-up 4)
 
 - The Gradle heap fix and the gradle.properties fix both held this time —
