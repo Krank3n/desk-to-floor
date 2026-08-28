@@ -16,8 +16,20 @@ npm run edit -- --log ~/sessions/session-20260821T093000-4f2a9c.json --out outpu
 | `--log <path>` | *required* | The session JSON. The video is read from its `recording.file`, resolved next to the log. |
 | `--out <dir>` | `output` | Where renders land (gitignored). |
 | `--font <path>` | fontconfig default | A `.ttf`/`.otf` for the burned titles. Pass one if titles look wrong. |
-| `--no-shorts` | off | Long-form only. |
+| `--preset <name>` | `default` | Named bundle of encode settings + whether to cut Shorts — see below. |
+| `--no-shorts` | preset decides | Force long-form only, overriding the preset. |
 | `--dry-run` | off | Print the ffmpeg commands without running them. |
+
+### Export presets (`src/presets.ts`)
+
+| Preset | Encode | Shorts | For |
+| --- | --- | --- | --- |
+| `default` | crf 20, preset `medium` | on | Balanced quality/speed — the original behaviour. |
+| `draft` | crf 28, preset `veryfast` | off | Quick long-form check of the cuts before a real export. |
+| `upload` | crf 18, preset `slow` | on | Final render that actually gets posted. |
+
+`--no-shorts` always wins over a preset's default. `--font` applies on top of
+whichever preset is chosen.
 
 Outputs: `<sessionId>-longform.mp4` (16:9, all kept moves, titles burned in)
 and one `NN-<move-id>.mp4` per highlight move (9:16, centre-cropped, ≤60s).

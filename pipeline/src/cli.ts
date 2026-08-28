@@ -5,12 +5,13 @@ import { parseEventLog } from '@/lib/eventlog';
 
 import { planEdit } from './edl';
 import { buildLongFormArgs, buildShortArgs, shortFileName } from './ffmpeg';
+import { DEFAULT_PRESET, resolvePreset } from './presets';
 import { runFfmpeg } from './run';
 
 /**
  * Usage:
  *   npm run edit -- --log <session-<id>.json> [--out output/] [--font <ttf>]
- *                   [--no-shorts] [--dry-run]
+ *                   [--preset default|draft|upload] [--no-shorts] [--dry-run]
  *
  * The source video is read from the log's `recording.file`, resolved next to
  * the log — that pairing is the app's contract (EVENTLOG.md).
@@ -19,12 +20,13 @@ interface Args {
   log: string;
   out: string;
   font?: string;
-  shorts: boolean;
+  preset: string;
+  shorts?: boolean;
   dryRun: boolean;
 }
 
 export function parseArgs(argv: string[]): Args {
-  const args: Args = { log: '', out: 'output', shorts: true, dryRun: false };
+  const args: Args = { log: '', out: 'output', preset: DEFAULT_PRESET, dryRun: false };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     switch (flag) {
@@ -36,6 +38,9 @@ export function parseArgs(argv: string[]): Args {
         break;
       case '--font':
         args.font = argv[++i];
+        break;
+      case '--preset':
+        args.preset = argv[++i] ?? DEFAULT_PRESET;
         break;
       case '--no-shorts':
         args.shorts = false;
@@ -50,7 +55,7 @@ export function parseArgs(argv: string[]): Args {
   if (!args.log) {
     throw new Error(
       'Usage: npm run edit -- --log <session-<id>.json> [--out output/] ' +
-        '[--font <ttf>] [--no-shorts] [--dry-run]',
+        '[--font <ttf>] [--preset default|draft|upload] [--no-shorts] [--dry-run]',
     );
   }
   return args;
@@ -58,6 +63,7 @@ export function parseArgs(argv: string[]): Args {
 
 export async function main(argv: string[]): Promise<void> {
   const args = parseArgs(argv);
+  const preset = resolvePreset(args.preset);
   const logPath = resolve(args.log);
   // parseEventLog hard-errors on an unknown schemaVersion — that is the point.
   const log = parseEventLog(await readFile(logPath, 'utf8'));
@@ -66,7 +72,8 @@ export async function main(argv: string[]): Promise<void> {
   const outDir = resolve(args.out);
   await mkdir(outDir, { recursive: true });
 
-  const render = { fontFile: args.font };
+  const render = { ...preset.render, fontFile: args.font };
+  const shorts = args.shorts ?? preset.shorts;
   const longForm = join(outDir, `${plan.sessionId}-longform.mp4`);
   const jobs: { label: string; args: string[] }[] = [
     {
@@ -75,7 +82,7 @@ export async function main(argv: string[]): Promise<void> {
     },
   ];
 
-  if (args.shorts) {
+  if (shorts) {
     plan.segments
       .filter((segment) => segment.highlight)
       .forEach((segment, i) => {
@@ -95,7 +102,7 @@ export async function main(argv: string[]): Promise<void> {
     `${plan.sessionId}: ${plan.segments.length} segments, ` +
       `${Math.round(plan.totalMs / 1000)}s kept` +
       (plan.bpm ? `, beat-synced at ${plan.bpm} BPM` : '') +
-      ` → ${jobs.length} output(s)`,
+      ` → ${jobs.length} output(s) [${preset.name} preset]`,
   );
 
   for (const job of jobs) {

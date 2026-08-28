@@ -3,6 +3,28 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-28 — M6: export presets
+
+- CI was green on `main` and no `FEEDBACK:` issues were open, so this run
+  took the next M6 item.
+- `pipeline/src/presets.ts` (pure): three named bundles of encode settings +
+  whether to cut Shorts — `default` (crf 20/medium, shorts on, unchanged
+  behaviour), `draft` (crf 28/veryfast, longform only — fast turnaround to
+  check the cuts), `upload` (crf 18/slow, shorts on — the final render that
+  actually gets posted). `resolvePreset()` throws a helpful error naming the
+  known presets on a typo.
+- Wired into the CLI as `--preset <name>` (default `default`); `--no-shorts`
+  still always wins over whatever the preset picks; `--font` still layers on
+  top of any preset. `npm run edit -- --dry-run` output now names the preset
+  used.
+- Pipeline-only change (no app UI, no event-log schema change): no Maestro
+  flow, no versionCode bump. 7 new tests (presets + cli arg parsing), 190
+  total.
+- **Check in the APK:** nothing to check on-device this run — the change is
+  in the desktop `npm run edit` pipeline. Next time you pull footage, try
+  `npm run edit -- --log <session.json> --preset draft --dry-run` and
+  `--preset upload` to confirm the encode settings differ as expected.
+
 ## 2026-08-27 — M6: progress stats — wrist range, squat hold, crow hold, 6-step tempo
 
 - CI was green on `main` and no `FEEDBACK:` issues were open, so this run

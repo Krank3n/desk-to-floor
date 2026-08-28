@@ -67,5 +67,5 @@ its tests pass and CI is green on `main`.
 
 - [x] Move reference clips
 - [x] Progress stats (wrist range, squat hold, crow hold, 6-step tempo)
-- [ ] Export presets
+- [x] Export presets
 - [ ] Session gallery
