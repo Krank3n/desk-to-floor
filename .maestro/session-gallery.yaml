@@ -1,0 +1,45 @@
+# M6 flow: finish a session, open it from the Sessions tab, confirm the
+# detail screen renders the plan and its moves. Doesn't assert on whether
+# footage played back or the "no footage" note showed — same
+# headless-emulator-camera caution as moves.yaml: this flow ends the
+# session moments after it starts, so whether recordAsync() handed back a
+# usable file in time is exactly the kind of native timing this flow
+# shouldn't depend on. 'Wrist rocks' as a move row (distinct from the
+# Sessions list, which only shows a move count) is enough to prove the
+# detail screen actually rendered the plan.
+appId: com.hansendev.desktofloor
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 60000
+- tapOn: 'Start session'
+- extendedWaitUntil:
+    visible: 'Begin session'
+    timeout: 15000
+- tapOn: 'Begin session'
+- extendedWaitUntil:
+    visible: 'Wrist rocks'
+    timeout: 15000
+- tapOn: 'End'
+- extendedWaitUntil:
+    visible: 'SESSION COMPLETE'
+    timeout: 10000
+- tapOn: 'Done'
+- extendedWaitUntil:
+    visible: 'Ready to train'
+    timeout: 10000
+- tapOn: 'Sessions'
+- extendedWaitUntil:
+    visible: 'Undesk · Week 1'
+    timeout: 10000
+- tapOn: 'Undesk · Week 1'
+- extendedWaitUntil:
+    visible: 'Moves'
+    timeout: 10000
+- assertVisible: 'Wrist rocks'
+- tapOn: 'Back'
+- extendedWaitUntil:
+    visible: 'Sessions'
+    timeout: 10000

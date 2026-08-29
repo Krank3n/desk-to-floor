@@ -3,6 +3,33 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-29 — M6: session gallery
+
+- CI was green on `main` and no `FEEDBACK:` issues were open, so this run
+  took the next M6 item.
+- The Sessions tab list is now tappable: each row navigates to
+  `/sessions/[id]` (new route, mirrors `moves/[id].tsx`), which shows the
+  session's plan name, when/how long it ran, the moves it covered, and — if
+  footage was saved — plays it back with `expo-video`'s `VideoView`
+  (nativeControls), reusing the `ClipPreview` pattern from move reference
+  clips. No footage saved shows a plain "No footage recorded for this
+  session." note instead.
+- `session-store.ts` gained `getEventLog(sessionId)` (read one full log by
+  id, null if missing/unreadable) and `sessionVideoPath(file)` — no schema
+  change, both just read what `saveSession` already writes.
+- 8 new tests (198 total): `session-store.ts`, a new
+  `session-detail-screen.test.tsx`, and a navigation-on-tap test for
+  `SessionsScreen`. New Maestro flow `.maestro/session-gallery.yaml` — it
+  deliberately doesn't assert on footage-vs-no-footage, since whether a
+  session ended moments after starting actually got a usable recording in
+  headless CI is exactly the kind of native timing `moves.yaml` already
+  learned not to depend on; it only proves the detail screen renders the
+  right plan.
+- versionCode 9 / v0.8.0.
+- **Check in the APK:** Sessions → tap any row → see the plan/moves and,
+  for a session you actually filmed, the footage plays back with native
+  controls.
+
 ## 2026-08-28 — M6: export presets
 
 - CI was green on `main` and no `FEEDBACK:` issues were open, so this run

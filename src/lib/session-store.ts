@@ -54,6 +54,23 @@ export async function saveSession(
   return path;
 }
 
+/** The full log for one session, or null if it isn't on disk (or unreadable). */
+export async function getEventLog(sessionId: string): Promise<EventLog | null> {
+  try {
+    const json = await FileSystem.readAsStringAsync(
+      `${sessionsDir()}session-${sessionId}.json`,
+    );
+    return parseEventLog(json);
+  } catch {
+    return null;
+  }
+}
+
+/** Absolute path to a session's saved footage, from its log's `recording.file`. */
+export function sessionVideoPath(file: string): string {
+  return `${sessionsDir()}${file}`;
+}
+
 /** Full logs, oldest first — what the coach reads (M5). */
 export async function listEventLogs(): Promise<EventLog[]> {
   const dir = sessionsDir();

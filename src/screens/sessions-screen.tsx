@@ -1,6 +1,6 @@
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/constants/theme';
@@ -27,6 +27,7 @@ function formatDuration(ms: number): string {
 }
 
 export default function SessionsScreen() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
 
   useFocusEffect(
@@ -59,14 +60,18 @@ export default function SessionsScreen() {
             keyExtractor={(item) => item.sessionId}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
-              <View style={styles.row}>
+              <Pressable
+                style={styles.row}
+                onPress={() => router.push(`/sessions/${item.sessionId}`)}
+                accessibilityRole="button"
+              >
                 <Text style={styles.rowTitle}>{item.name}</Text>
                 <Text style={styles.rowMeta}>
                   {formatWhen(item.startedAt)} · {item.moveCount} moves ·{' '}
                   {formatDuration(item.durationMs)}
                   {item.hasVideo ? ' · video' : ''}
                 </Text>
-              </View>
+              </Pressable>
             )}
           />
         )}

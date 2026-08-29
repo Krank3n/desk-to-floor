@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
 
 import { EXERCISES } from '@/lib/exercises';
 import { listReferenceClipIds } from '@/lib/reference-clips-store';
@@ -7,10 +7,11 @@ import SessionsScreen from '@/screens/sessions-screen';
 import SettingsScreen from '@/screens/settings-screen';
 import TrainScreen from '@/screens/train-screen';
 
+const mockPush = jest.fn();
 jest.mock('expo-router', () => {
   const React = jest.requireActual('react');
   return {
-    useRouter: () => ({ push: jest.fn(), back: jest.fn(), replace: jest.fn() }),
+    useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn() }),
     useFocusEffect: (cb: () => void | (() => void)) =>
       React.useEffect(() => cb(), [cb]),
   };
@@ -75,6 +76,23 @@ describe('SessionsScreen', () => {
     );
     expect(screen.getByText(/10 moves/)).toBeOnTheScreen();
     expect(screen.getByText(/· video/)).toBeOnTheScreen();
+  });
+
+  it('navigates to the session detail route on tap', async () => {
+    (listSessionSummaries as jest.Mock).mockResolvedValueOnce([
+      {
+        sessionId: 'abc123',
+        startedAt: '2026-08-21T09:30:00.000Z',
+        name: 'Undesk · Week 1',
+        moveCount: 10,
+        durationMs: 600000,
+        hasVideo: true,
+      },
+    ]);
+    const user = userEvent.setup();
+    await render(<SessionsScreen />);
+    await user.press(await screen.findByText('Undesk · Week 1'));
+    expect(mockPush).toHaveBeenCalledWith('/sessions/abc123');
   });
 });
 

@@ -1,7 +1,12 @@
 import * as FileSystem from 'expo-file-system/legacy';
 
 import { buildEventLog, SessionEvent } from '@/lib/eventlog';
-import { listSessionSummaries, saveSession } from '@/lib/session-store';
+import {
+  getEventLog,
+  listSessionSummaries,
+  saveSession,
+  sessionVideoPath,
+} from '@/lib/session-store';
 
 jest.mock('expo-file-system/legacy', () => ({
   documentDirectory: 'file:///doc/',
@@ -82,5 +87,29 @@ describe('listSessionSummaries', () => {
   it('returns empty when the directory does not exist yet', async () => {
     fs.readDirectoryAsync.mockRejectedValueOnce(new Error('ENOENT'));
     await expect(listSessionSummaries()).resolves.toEqual([]);
+  });
+});
+
+describe('getEventLog', () => {
+  it('reads and parses a session by id', async () => {
+    fs.readAsStringAsync.mockResolvedValueOnce(JSON.stringify(log));
+    const result = await getEventLog('abc123');
+    expect(fs.readAsStringAsync).toHaveBeenCalledWith(
+      'file:///doc/sessions/session-abc123.json',
+    );
+    expect(result?.sessionId).toBe('abc123');
+  });
+
+  it('returns null when the session is missing or unreadable', async () => {
+    fs.readAsStringAsync.mockRejectedValueOnce(new Error('ENOENT'));
+    await expect(getEventLog('nope')).resolves.toBeNull();
+  });
+});
+
+describe('sessionVideoPath', () => {
+  it('joins the sessions dir with the recording filename', () => {
+    expect(sessionVideoPath('session-abc123.mp4')).toBe(
+      'file:///doc/sessions/session-abc123.mp4',
+    );
   });
 });
