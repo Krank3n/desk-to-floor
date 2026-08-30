@@ -3,6 +3,19 @@
 Newest first. One short entry per run — what changed, and anything worth
 checking in the next APK.
 
+## 2026-08-30 — nightly run: roadmap complete, no action taken
+
+- CI was green on `main` (run #21, M6 session gallery) and no `FEEDBACK:`
+  issues were open.
+- Checked ROADMAP.md for the next item per CLAUDE.md rule 3: every item in
+  every milestone (M0 through M6) is already checked off. There is no
+  unfinished milestone to pull an item from, so this run made no code
+  changes rather than inventing scope beyond what's planned.
+- Nothing to check in the next APK — no APK was built this run.
+- **For the owner:** the roadmap needs a new milestone (M7+) before the
+  next nightly run has anything to build. Add items to ROADMAP.md whenever
+  convenient.
+
 ## 2026-08-29 — M6: session gallery
 
 - CI was green on `main` and no `FEEDBACK:` issues were open, so this run
